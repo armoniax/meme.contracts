@@ -1,1 +1,0 @@
-cmd='/usr/local/Cellar/cmake/3.27.1/bin/cmake;-DCMAKE_TOOLCHAIN_FILE=/usr/local/amax.cdt/lib/cmake/amax.cdt/AmaxWasmToolchain.cmake;-DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>;-DCONTRACT_VERSION_FILE=/Users/joslin/code/workspace/meme/meme.contracts/build/version/ContractVersion.cmake;-GUnix Makefiles;-S;<SOURCE_DIR><SOURCE_SUBDIR>;-B;<BINARY_DIR>'

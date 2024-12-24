@@ -62,10 +62,13 @@ namespace meme_token {
         check(quantity.symbol == st.supply.symbol, "symbol precision mismatch");
         check(quantity.amount <= st.max_supply.amount - st.supply.amount, "quantity exceeds available supply");
 
-        statstable.modify(st, same_payer, [&](auto &s)
-                          { s.supply += quantity; });
+        auto ret = add_balance(st, st.issuer, quantity, st.issuer);
 
-        add_balance(st, st.issuer, quantity, st.issuer);
+
+        statstable.modify(st, same_payer, [&](auto &s)
+                          { s.supply += quantity; 
+                            s.total_accounts += ret; });
+
     }
 
     void xtoken::retire(const asset &quantity, const string &memo)
@@ -87,10 +90,16 @@ namespace meme_token {
 
         check(quantity.symbol == st.supply.symbol, "symbol precision mismatch");
 
-        statstable.modify(st, same_payer, [&](auto &s)
-                          { s.supply -= quantity; });
+        auto add_count = 0;
 
-        sub_balance(st, st.issuer, quantity);
+        if(!sub_balance(st, st.issuer, quantity)) {
+            add_count = 1;
+        }
+
+        statstable.modify(st, same_payer, [&](auto &s)
+                          { s.supply -= quantity; 
+                            s.total_accounts += add_count; });
+
     }
 
     void xtoken::transfer(const name &from,
@@ -137,14 +146,23 @@ namespace meme_token {
 
         auto payer = has_auth(to) ? to : from;
 
-        sub_balance(st, from, quantity, true);
-        add_balance(st, to, actual_recv, payer, true);
+        auto add_count = 0;
+        if(!sub_balance(st, from, quantity, true)) {
+            add_count = 1;
+        }
+        if(add_balance(st, to, actual_recv, payer, true)) {
+            add_count += 1;
+        }
 
         if (fee.amount > 0) {
-            add_balance(st, st.fee_receiver, fee, payer);
+            if(add_balance(st, st.fee_receiver, fee, payer)) {
+                add_count += 1;
+            }
             notifypayfee_action notifypayfee_act{ get_self(), { {get_self(), active_permission} } };
             notifypayfee_act.send( from, to, st.fee_receiver, fee, memo );
         }
+        statstable.modify(st, same_payer, [&](auto &s)
+                          { s.total_accounts += add_count; });
     }
 
     /**
@@ -164,7 +182,7 @@ namespace meme_token {
         require_recipient(fee_receiver);
     }
 
-    void xtoken::sub_balance(const currency_stats &st, const name &owner, const asset &value,
+    bool xtoken::sub_balance(const currency_stats &st, const name &owner, const asset &value,
                              bool is_check_frozen)
     {
         accounts from_accts(get_self(), owner.value);
@@ -174,32 +192,42 @@ namespace meme_token {
         }
         check(from.balance.amount >= value.amount, "overdrawn balance");
 
+      
         from_accts.modify(from, owner, [&](auto &a) {
             a.balance -= value;
         });
-
+        if (from.balance.amount == value.amount) {
+            return true;
+        }
+        return false;
     }
 
-    void xtoken::add_balance(const currency_stats &st, const name &owner, const asset &value,
+    bool xtoken::add_balance(const currency_stats &st, const name &owner, const asset &value,
                              const name &ram_payer, bool is_check_frozen)
     {
         accounts to_accts(get_self(), owner.value);
         auto to = to_accts.find(value.symbol.code().raw());
+        auto ret = false;
         if (to == to_accts.end())
         {
             to_accts.emplace(ram_payer, [&](auto &a) {
                 a.balance = value;
             });
+            ret = true;
         }
         else
         {
             if (is_check_frozen) {
                 check(!is_account_frozen(st, owner, *to), "to account is frozen");
             }
+            if (to->balance.amount == 0) {
+                ret = true;
+            }
             to_accts.modify(to, same_payer, [&](auto &a) {
                 a.balance += value;
             });
         }
+        return ret;
     }
 
     void xtoken::open(const name &owner, const symbol &symbol, const name &ram_payer)

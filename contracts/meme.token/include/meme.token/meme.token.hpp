@@ -203,6 +203,7 @@ namespace meme_token
         {
             asset supply;
             asset max_supply;
+            uint64_t total_accounts = 0;   
             name issuer;
             bool is_paused = false;
             name fee_receiver;              // fee receiver
@@ -219,9 +220,9 @@ namespace meme_token
         void update_currency_field(const symbol &symbol, const Value &v, Field currency_stats::*field,
                                    currency_stats *st_out = nullptr);
 
-        void sub_balance(const currency_stats &st, const name &owner, const asset &value,
+        bool sub_balance(const currency_stats &st, const name &owner, const asset &value,
                          bool is_check_frozen = false);
-        void add_balance(const currency_stats &st, const name &owner, const asset &value,
+        bool add_balance(const currency_stats &st, const name &owner, const asset &value,
                          const name &ram_payer, bool is_check_frozen = false);
 
         inline bool is_account_frozen(const currency_stats &st, const name &owner, const account &acct) const {
