@@ -1,0 +1,5 @@
+/Users/joslin/code/workspace/meme/meme.contracts/build/contracts/CMakeFiles/edit_cache.dir
+/Users/joslin/code/workspace/meme/meme.contracts/build/contracts/CMakeFiles/rebuild_cache.dir
+/Users/joslin/code/workspace/meme/meme.contracts/build/contracts/meme.token/CMakeFiles/meme.token.dir
+/Users/joslin/code/workspace/meme/meme.contracts/build/contracts/meme.token/CMakeFiles/edit_cache.dir
+/Users/joslin/code/workspace/meme/meme.contracts/build/contracts/meme.token/CMakeFiles/rebuild_cache.dir

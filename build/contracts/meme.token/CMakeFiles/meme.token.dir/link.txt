@@ -1,0 +1,1 @@
+/usr/local/amax.cdt/bin/amax-ld -L/usr/local/opt/openssl@1.1/lib CMakeFiles/meme.token.dir/src/meme.token.cpp.obj -o meme.token.wasm 

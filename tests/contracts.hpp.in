@@ -1,0 +1,35 @@
+#pragma once
+#include <eosio/testing/tester.hpp>
+
+namespace eosio { namespace testing {
+
+struct contracts {
+   static std::vector<uint8_t> system_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/amax.system/amax.system.wasm"); }
+   static std::vector<char>    system_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/amax.system/amax.system.abi"); }
+   static std::vector<uint8_t> token_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/amax.token/amax.token.wasm"); }
+   static std::vector<char>    token_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/amax.token/amax.token.abi"); }
+   static std::vector<uint8_t> msig_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/amax.msig/amax.msig.wasm"); }
+   static std::vector<char>    msig_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/amax.msig/amax.msig.abi"); }
+   static std::vector<uint8_t> wrap_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/amax.wrap/amax.wrap.wasm"); }
+   static std::vector<char>    wrap_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/amax.wrap/amax.wrap.abi"); }
+   static std::vector<uint8_t> bios_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/amax.bios/amax.bios.wasm"); }
+   static std::vector<char>    bios_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/amax.bios/amax.bios.abi"); }
+   static std::vector<uint8_t> xtoken_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/amax.xtoken/amax.xtoken.wasm"); }
+   static std::vector<char>    xtoken_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/amax.xtoken/amax.xtoken.abi"); }
+   static std::vector<uint8_t> custody_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/amax.custody/amax.custody.wasm"); }
+   static std::vector<char>    custody_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/amax.custody/amax.custody.abi"); }
+   static std::vector<uint8_t> reward_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/amax.reward/amax.reward.wasm"); }
+   static std::vector<char>    reward_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/amax.reward/amax.reward.abi"); }
+
+   struct util {
+      static std::vector<uint8_t> reject_all_wasm() { return read_wasm("${CMAKE_SOURCE_DIR}/test_contracts/reject_all.wasm"); }
+      static std::vector<uint8_t> exchange_wasm() { return read_wasm("${CMAKE_SOURCE_DIR}/test_contracts/exchange.wasm"); }
+      static std::vector<uint8_t> token_test_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/test_contracts/token_test/token_test.wasm"); }
+      static std::vector<char> token_test_abi() { return read_abi("${CMAKE_BINARY_DIR}/test_contracts/token_test/token_test.abi"); }
+      static std::vector<uint8_t> xtoken_deposit_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/test_contracts/xtoken_deposit/xtoken_deposit.wasm"); }
+      static std::vector<char> xtoken_deposit_abi() { return read_abi("${CMAKE_BINARY_DIR}/test_contracts/xtoken_deposit/xtoken_deposit.abi"); }
+      static std::vector<uint8_t> system_test_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/test_contracts/system_test/system_test.wasm"); }
+      static std::vector<char> system_test_abi() { return read_abi("${CMAKE_BINARY_DIR}/test_contracts/system_test/system_test.abi"); }
+   };
+};
+}} //ns eosio::testing

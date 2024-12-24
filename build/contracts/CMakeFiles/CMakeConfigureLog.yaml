@@ -1,0 +1,166 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/Cellar/cmake/3.27.1/share/cmake/Modules/CMakeDetermineSystem.cmake:206 (message)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      The target system is: Generic -  - wasm
+      The host system is: Darwin - 22.6.0 - x86_64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/Cellar/cmake/3.27.1/share/cmake/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/usr/local/Cellar/cmake/3.27.1/share/cmake/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/usr/local/Cellar/cmake/3.27.1/share/cmake/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" failed.
+      Compiler: /usr/local/amax.cdt/bin/amax-cc 
+      Build flags: -O3
+      Id flags:  
+      
+      The output was:
+      255
+      /usr/local/amax.cdt/bin/wasm-ld: error: fatal failure: contract with no actions and trying to create dispatcher
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/Cellar/cmake/3.27.1/share/cmake/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/usr/local/Cellar/cmake/3.27.1/share/cmake/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/usr/local/Cellar/cmake/3.27.1/share/cmake/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler: /usr/local/amax.cdt/bin/amax-cc 
+      Build flags: -O3
+      Id flags: -c 
+      
+      The output was:
+      0
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CMakeCCompilerId.wasm"
+      
+      The C compiler identification is Clang, found in:
+        /Users/joslin/code/workspace/meme/meme.contracts/build/contracts/CMakeFiles/3.27.1/CompilerIdC/CMakeCCompilerId.wasm
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/Cellar/cmake/3.27.1/share/cmake/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/usr/local/Cellar/cmake/3.27.1/share/cmake/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/usr/local/Cellar/cmake/3.27.1/share/cmake/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+      Compiler: /usr/local/amax.cdt/bin/amax-cpp 
+      Build flags: -O3
+      Id flags:  
+      
+      The output was:
+      255
+      /usr/local/amax.cdt/bin/wasm-ld: error: fatal failure: contract with no actions and trying to create dispatcher
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/Cellar/cmake/3.27.1/share/cmake/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/usr/local/Cellar/cmake/3.27.1/share/cmake/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/usr/local/Cellar/cmake/3.27.1/share/cmake/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler: /usr/local/amax.cdt/bin/amax-cpp 
+      Build flags: -O3
+      Id flags: -c 
+      
+      The output was:
+      0
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CMakeCXXCompilerId.wasm"
+      
+      The CXX compiler identification is Clang, found in:
+        /Users/joslin/code/workspace/meme/meme.contracts/build/contracts/CMakeFiles/3.27.1/CompilerIdCXX/CMakeCXXCompilerId.wasm
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/Cellar/cmake/3.27.1/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:57 (try_compile)"
+      - "/usr/local/Cellar/cmake/3.27.1/share/cmake/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "/Users/joslin/code/workspace/meme/meme.contracts/build/contracts/CMakeFiles/CMakeScratch/TryCompile-Pxr3YG"
+      binary: "/Users/joslin/code/workspace/meme/meme.contracts/build/contracts/CMakeFiles/CMakeScratch/TryCompile-Pxr3YG"
+    cmakeVariables:
+      CMAKE_C_FLAGS: " -O3 "
+      CMAKE_EXE_LINKER_FLAGS: "-L/usr/local/opt/openssl@1.1/lib"
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/Users/joslin/code/workspace/meme/meme.contracts/build/contracts/CMakeFiles/CMakeScratch/TryCompile-Pxr3YG'
+        
+        Run Build Command(s): /usr/local/Cellar/cmake/3.27.1/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_f15dd/fast
+        /Library/Developer/CommandLineTools/usr/bin/make  -f CMakeFiles/cmTC_f15dd.dir/build.make CMakeFiles/cmTC_f15dd.dir/build
+        Building C object CMakeFiles/cmTC_f15dd.dir/CMakeCCompilerABI.c.obj
+        /usr/local/amax.cdt/bin/amax-cc   -O3     -v -MD -MT CMakeFiles/cmTC_f15dd.dir/CMakeCCompilerABI.c.obj -MF CMakeFiles/cmTC_f15dd.dir/CMakeCCompilerABI.c.obj.d -o CMakeFiles/cmTC_f15dd.dir/CMakeCCompilerABI.c.obj -c /usr/local/Cellar/cmake/3.27.1/share/cmake/Modules/CMakeCCompilerABI.c
+        clang version 7.0.0 (https://github.com/eosio/clang.git 6b886302a11a8419b76e469794ff9d0c531a4b4b) (git@github.com:eosio/llvm 3c026f8b7813ad693749d3551353a554c5ca33e7)
+        Target: x86_64-apple-darwin22.6.0
+        Thread model: posix
+        InstalledDir: /usr/local/amax.cdt/bin
+        Linking C executable cmTC_f15dd.wasm
+        /usr/local/Cellar/cmake/3.27.1/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f15dd.dir/link.txt --verbose=1
+        /usr/local/amax.cdt/bin/amax-ld -L/usr/local/opt/openssl@1.1/lib -v CMakeFiles/cmTC_f15dd.dir/CMakeCCompilerABI.c.obj -o cmTC_f15dd.wasm 
+        amax-ld: Unknown command line argument '-v'.  Try: '/usr/local/amax.cdt/bin/amax-ld -help'
+        amax-ld: Did you mean '-L'?
+        make[4]: *** [cmTC_f15dd.wasm] Error 1
+        make[3]: *** [cmTC_f15dd/fast] Error 2
+        
+      exitCode: 2
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/Cellar/cmake/3.27.1/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:57 (try_compile)"
+      - "/usr/local/Cellar/cmake/3.27.1/share/cmake/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "/Users/joslin/code/workspace/meme/meme.contracts/build/contracts/CMakeFiles/CMakeScratch/TryCompile-5ZBRQu"
+      binary: "/Users/joslin/code/workspace/meme/meme.contracts/build/contracts/CMakeFiles/CMakeScratch/TryCompile-5ZBRQu"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: " -O3 "
+      CMAKE_EXE_LINKER_FLAGS: "-L/usr/local/opt/openssl@1.1/lib"
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/Users/joslin/code/workspace/meme/meme.contracts/build/contracts/CMakeFiles/CMakeScratch/TryCompile-5ZBRQu'
+        
+        Run Build Command(s): /usr/local/Cellar/cmake/3.27.1/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_5dc2c/fast
+        /Library/Developer/CommandLineTools/usr/bin/make  -f CMakeFiles/cmTC_5dc2c.dir/build.make CMakeFiles/cmTC_5dc2c.dir/build
+        Building CXX object CMakeFiles/cmTC_5dc2c.dir/CMakeCXXCompilerABI.cpp.obj
+        /usr/local/amax.cdt/bin/amax-cpp   -O3     -v -MD -MT CMakeFiles/cmTC_5dc2c.dir/CMakeCXXCompilerABI.cpp.obj -MF CMakeFiles/cmTC_5dc2c.dir/CMakeCXXCompilerABI.cpp.obj.d -o CMakeFiles/cmTC_5dc2c.dir/CMakeCXXCompilerABI.cpp.obj -c /usr/local/Cellar/cmake/3.27.1/share/cmake/Modules/CMakeCXXCompilerABI.cpp
+        clang version 7.0.0 (https://github.com/eosio/clang.git 6b886302a11a8419b76e469794ff9d0c531a4b4b) (git@github.com:eosio/llvm 3c026f8b7813ad693749d3551353a554c5ca33e7)
+        Target: x86_64-apple-darwin22.6.0
+        Thread model: posix
+        InstalledDir: /usr/local/amax.cdt/bin
+        Linking CXX executable cmTC_5dc2c.wasm
+        /usr/local/Cellar/cmake/3.27.1/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5dc2c.dir/link.txt --verbose=1
+        /usr/local/amax.cdt/bin/amax-ld -L/usr/local/opt/openssl@1.1/lib -v CMakeFiles/cmTC_5dc2c.dir/CMakeCXXCompilerABI.cpp.obj -o cmTC_5dc2c.wasm 
+        amax-ld: Unknown command line argument '-v'.  Try: '/usr/local/amax.cdt/bin/amax-ld -help'
+        amax-ld: Did you mean '-L'?
+        make[4]: *** [cmTC_5dc2c.wasm] Error 1
+        make[3]: *** [cmTC_5dc2c/fast] Error 2
+        
+      exitCode: 2
+...
