@@ -92,8 +92,8 @@ namespace meme_token {
 
         auto add_count = 0;
 
-        if(!sub_balance(st, st.issuer, quantity)) {
-            add_count = 1;
+        if(sub_balance(st, st.issuer, quantity)) {
+            add_count = -1;
         }
 
         statstable.modify(st, same_payer, [&](auto &s)
@@ -147,8 +147,8 @@ namespace meme_token {
         auto payer = has_auth(to) ? to : from;
 
         auto add_count = 0;
-        if(!sub_balance(st, from, quantity, true)) {
-            add_count = 1;
+        if(sub_balance(st, from, quantity, true)) {
+            add_count = -1;
         }
         if(add_balance(st, to, actual_recv, payer, true)) {
             add_count += 1;
