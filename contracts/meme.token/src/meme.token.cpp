@@ -18,59 +18,6 @@ namespace meme_token {
 
     #define multiply_decimal64(a, b, precision) multiply_decimal<int64_t, int128_t>(a, b, precision)
 
-    void xtoken::create(const name &issuer,
-                        const asset &maximum_supply)
-    {
-        require_auth(get_self());
-
-        check(is_account(issuer), "issuer account does not exist");
-        const auto &sym = maximum_supply.symbol;
-        auto sym_code_raw = sym.code().raw();
-        check(sym.is_valid(), "invalid symbol name");
-        check(maximum_supply.is_valid(), "invalid supply");
-        check(maximum_supply.amount > 0, "max-supply must be positive");
-
-        stats statstable(get_self(), sym_code_raw);
-        auto existing = statstable.find(sym_code_raw);
-        check(existing == statstable.end(), "token with symbol already exists");
-
-        statstable.emplace(get_self(), [&](auto &s) {
-            s.supply.symbol     = maximum_supply.symbol;
-            s.max_supply        = maximum_supply;
-            s.issuer            = issuer;
-            s.min_fee_quantity  = asset(0, maximum_supply.symbol);
-        });
-    }
-
-    void xtoken::issue(const name &to, const asset &quantity, const string &memo)
-    {
-        const auto& sym = quantity.symbol;
-        auto sym_code_raw = sym.code().raw();
-        check(sym.is_valid(), "invalid symbol name");
-        check(memo.size() <= 256, "memo has more than 256 bytes");
-
-        stats statstable(get_self(), sym_code_raw);
-        auto existing = statstable.find(sym_code_raw);
-        check(existing != statstable.end(), "token with symbol does not exist, create token before issue");
-        const auto &st = *existing;
-        check(to == st.issuer, "tokens can only be issued to issuer account");
-
-        require_auth(st.issuer);
-        check(quantity.is_valid(), "invalid quantity");
-        check(quantity.amount > 0, "must issue positive quantity");
-
-        check(quantity.symbol == st.supply.symbol, "symbol precision mismatch");
-        check(quantity.amount <= st.max_supply.amount - st.supply.amount, "quantity exceeds available supply");
-
-        auto ret = add_balance(st, st.issuer, quantity, st.issuer);
-
-
-        statstable.modify(st, same_payer, [&](auto &s)
-                          { s.supply += quantity; 
-                            s.total_accounts += ret; });
-
-    }
-
     void xtoken::retire(const asset &quantity, const string &memo)
     {
         const auto& sym = quantity.symbol;
@@ -168,14 +115,14 @@ namespace meme_token {
 
         if (fee.amount > 0) {
             //split fee
-            asset distory_fee = asset(0, fee.symbol);
-            if(st.distory_ratio > 0) {
-                distory_fee.amount = multiply_decimal64(fee.amount, st.distory_ratio, RATIO_BOOST);
-                if(distory_fee.amount > 0) {
-                    add_balance(st, "oooo"_n, distory_fee, payer);
+            asset destroy_fee = asset(0, fee.symbol);
+            if(st.destroy_ratio > 0) {
+                destroy_fee.amount = multiply_decimal64(fee.amount, st.destroy_ratio, RATIO_BOOST);
+                if(destroy_fee.amount > 0) {
+                    add_balance(st, "oooo"_n, destroy_fee, payer);
                 }
             }
-            fee -= distory_fee;
+            fee -= destroy_fee;
             if(fee.amount > 0) {
                 if(add_balance(st, st.fee_receiver, fee, payer)) {
                     add_count += 1;
@@ -367,27 +314,78 @@ namespace meme_token {
     }
 
 
-    void xtoken::setacctperms(const name& issuer, const name& to, const symbol& symbol,  const bool& is_fee_exempt, const bool& allowsend) {
-    require_auth( issuer );
-    require_issuer(issuer, symbol);
+    void xtoken::setacctperms(const name& issuer, const name& to, const symbol& symbol,  
+                    const bool& is_fee_exempt, const bool& allowsend) {
+        require_auth( _gstate.admin);
+        require_issuer(issuer, symbol);
 
-    check( is_account( to ), "to account does not exist: " + to.to_string() );
+        check( is_account( to ), "to account does not exist: " + to.to_string() );
 
-    accounts acnts( get_self(), to.value );
-    auto it = acnts.find( symbol.code().raw() );
-    if( it == acnts.end() ) {
-      acnts.emplace( issuer, [&]( auto& a ){
-        a.balance           = asset(0, symbol);
-        a.is_fee_exempt     = is_fee_exempt;
-        a.allow_send        = allowsend;
-      });
-   } else {
-      acnts.modify( it, issuer, [&]( auto& a ) {
-        a.is_fee_exempt     = is_fee_exempt;
-        a.allow_send        = allowsend;
-      });
-   }
+        accounts acnts( get_self(), to.value );
+        auto it = acnts.find( symbol.code().raw() );
+        if( it == acnts.end() ) {
+            acnts.emplace( issuer, [&]( auto& a ){
+                a.balance           = asset(0, symbol);
+                a.is_fee_exempt     = is_fee_exempt;
+                a.allow_send        = allowsend;
+            });
+        } else {
+            acnts.modify( it, issuer, [&]( auto& a ) {
+                a.is_fee_exempt     = is_fee_exempt;
+                a.allow_send        = allowsend;
+            });
+        }
+    }
+    void xtoken::initmeme(const name &issuer, const asset &maximum_supply, const bool& is_airdrop,
+                    const name& fee_receiver, const uint64_t& transfer_ratio, const uint64_t& destroy_ratio,
+                    const uint64_t& airdrop_ratio) {
+        require_auth(_gstate.meme_reg);
+        //创建token
+        check(is_account(issuer), "issuer account does not exist");
+        const auto &sym = maximum_supply.symbol;
+        auto sym_code_raw = sym.code().raw();
+        check(sym.is_valid(), "invalid symbol name");
+        check(maximum_supply.is_valid(), "invalid supply");
+        check(maximum_supply.amount > 0, "max-supply must be positive");
 
-}
+        stats statstable(get_self(), sym_code_raw);
+        auto existing = statstable.find(sym_code_raw);
+        check(existing == statstable.end(), "token with symbol already exists");
 
+        statstable.emplace(get_self(), [&](auto &s) {
+            s.supply            = maximum_supply;
+            s.max_supply        = maximum_supply;
+            s.issuer            = issuer;
+            s.min_fee_quantity  = asset(0, maximum_supply.symbol);
+            s.is_airdrop        = is_airdrop;
+            s.fee_receiver      = fee_receiver;
+            s.fee_ratio         = transfer_ratio;
+            s.destroy_ratio     = destroy_ratio;
+            s.total_accounts    = 1;
+        });
+
+        auto airdrop_amount = maximum_supply.amount * airdrop_ratio / RATIO_BOOST;
+        auto airdrop_asset = asset(airdrop_amount, maximum_supply.symbol);
+        auto remain_amount = maximum_supply.amount - airdrop_amount;
+        auto remain_asset = asset(remain_amount, maximum_supply.symbol);
+        _add_balance( _gstate.meme_airdrop_contract, airdrop_asset, issuer);
+        _add_balance(   issuer,                     remain_asset,   issuer);
+    }
+
+
+    void xtoken::_add_balance( const name &owner, const asset &value, const name &ram_payer)
+    {
+        accounts to_accts(get_self(), owner.value);
+        auto to = to_accts.find(value.symbol.code().raw());
+        if (to == to_accts.end()) {
+            to_accts.emplace(ram_payer, [&](auto &a) {
+                a.balance = value;
+            });
+        } else { 
+                to_accts.modify(to, same_payer, [&](auto &a) {
+                a.balance += value;
+            });
+        }
+    }
 } /// namespace meme_token
+

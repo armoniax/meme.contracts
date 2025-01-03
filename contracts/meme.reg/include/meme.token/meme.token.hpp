@@ -25,13 +25,6 @@ namespace meme_token
 
         [[eosio::action]] void create(const name &issuer,
                                       const asset &maximum_supply);
-        /**
-         *  This action issues to `to` account a `quantity` of tokens.
-         *
-         * @param to - the account to issue tokens to, it must be the same as the issuer,
-         * @param quntity - the amount of tokens to be issued,
-         * @memo - the memo string that accompanies the token issue transaction.
-         */
         [[eosio::action]] void issue(const name &to, const asset &quantity, const string &memo);
 
         [[eosio::action]] void retire(const asset &quantity, const string &memo);
@@ -99,7 +92,7 @@ namespace meme_token
             bool is_paused = false;
             name fee_receiver;              // fee receiver
             uint64_t fee_ratio = 0;         // fee ratio, boost 10000
-            uint64_t distory_ratio = 0;     // distory ratio
+            uint64_t destroy_ratio = 0;     // destroy ratio
             asset min_fee_quantity;         // min fee quantity
 
             uint64_t primary_key() const { return supply.symbol.code().raw(); }

@@ -114,6 +114,7 @@ void meme_reg::on_transfer(const name& from, const name& to, const asset& quanti
    //mpush amax.mtoken issue '["armoniaadmin", "1000000.000000 '$tname'", "1st issue"]' -p armoniaadmin
    //mpush amax.mtoken transfer '["armoniaadmin", "armoniaadmin", "1000000.000000 '$tname'", "1st issue"]' -p armoniaadmin
 
+   
 
 
 }

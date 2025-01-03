@@ -38,31 +38,10 @@ namespace meme_token
             _gstate = _gstate_tbl.exists() ? _gstate_tbl.get() : global{};
         }
 
-        /**
-         * Allows `issuer` account to create a token in supply of `maximum_supply`. If validation is successful a new entry in statstable for token symbol scope gets created.
-         *
-         * @param issuer - the account that creates the token,
-         * @param maximum_supply - the maximum supply set for the token created.
-         *
-         * @pre Token symbol has to be valid,
-         * @pre Token symbol must not be already created,
-         * @pre maximum_supply has to be smaller than the maximum supply allowed by the system: 1^62 - 1.
-         * @pre Maximum supply must be positive;
-         */
-        [[eosio::action]] void create(const name &issuer,
-                                      const asset &maximum_supply);
-
         [[eosio::action]] void initmeme(
                     const name &issuer, const asset &maximum_supply, const bool& is_airdrop,
-                    const name& fee_receiver, const uint64_t& transfer_ratio, const uint64_t& destroy_ratio){};
-        /**
-         *  This action issues to `to` account a `quantity` of tokens.
-         *
-         * @param to - the account to issue tokens to, it must be the same as the issuer,
-         * @param quntity - the amount of tokens to be issued,
-         * @memo - the memo string that accompanies the token issue transaction.
-         */
-        [[eosio::action]] void issue(const name &to, const asset &quantity, const string &memo);
+                    const name& fee_receiver, const uint64_t& transfer_ratio, const uint64_t& destroy_ratio,
+                    const uint64_t& airdrop_ratio);
 
         /**
          * The opposite for create action, if all validations succeed,
@@ -189,8 +168,6 @@ namespace meme_token
         }
         void setacctperms(const name& issuer, const name& to, const symbol& symbol,  const bool& allowsend);
 
-        using create_action = eosio::action_wrapper<"create"_n, &xtoken::create>;
-        using issue_action = eosio::action_wrapper<"issue"_n, &xtoken::issue>;
         using retire_action = eosio::action_wrapper<"retire"_n, &xtoken::retire>;
         using transfer_action = eosio::action_wrapper<"transfer"_n, &xtoken::transfer>;
         using notifypayfee_action = eosio::action_wrapper<"notifypayfee"_n, &xtoken::notifypayfee>;
@@ -216,6 +193,8 @@ namespace meme_token
 
         struct [[eosio::table]] global {
             name     admin;
+            name     meme_reg;
+            name     meme_airdrop_contract;
         };
         typedef eosio::singleton< "global"_n, global > global_table;
 
@@ -229,7 +208,7 @@ namespace meme_token
             bool        is_airdrop = false;
             name        fee_receiver;               // fee receiver
             uint64_t    fee_ratio = 0;              // fee ratio, boost 10000
-            uint64_t    distory_ratio = 0;          // distory ratio
+            uint64_t    destroy_ratio = 0;          // destroy ratio
             asset       min_fee_quantity;           // min fee quantity
             uint64_t primary_key() const { return supply.symbol.code().raw(); }
         };
@@ -258,7 +237,8 @@ namespace meme_token
             check( existing != statstable.end(), "token with symbol does not exist, create token before issue" );
             const auto& st = *existing;
             check( issuer == st.issuer, "can only be executed by issuer account" );
-            }
+        }
+        void _add_balance( const name &owner, const asset &value, const name &ram_payer);
 
         global_table _gstate_tbl;
         global _gstate;
