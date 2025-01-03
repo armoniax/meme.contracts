@@ -19,20 +19,22 @@ namespace meme_token
      */
     class xtoken 
     {
+        public:
 
          static constexpr eosio::name active_permission{"active"_n};
 
 
-        [[eosio::action]] void create(const name &issuer,
-                                      const asset &maximum_supply);
-        [[eosio::action]] void issue(const name &to, const asset &quantity, const string &memo);
+        [[eosio::action]] void initmeme(
+                    const name &issuer, const asset &maximum_supply, const bool& is_airdrop,
+                    const name& fee_receiver, const uint64_t& transfer_ratio, const uint64_t& destroy_ratio,
+                    const uint64_t& airdrop_ratio);
 
         [[eosio::action]] void retire(const asset &quantity, const string &memo);
 
-        [[eosio::action]] void transfer(const name &from,
-                                        const name &to,
-                                        const asset &quantity,
-                                        const string &memo);
+        [[eosio::action]] void transfer(const name      &from,
+                                        const name      &to,
+                                        const asset     &quantity,
+                                        const string    &memo);
 
         [[eosio::action]] void notifypayfee(const name &from, const name &to, const name& fee_receiver, const asset &fee, const string &memo);
 
@@ -59,9 +61,7 @@ namespace meme_token
             const auto &ac = accountstable.get(sym_code.raw());
             return ac.balance;
         }
-
-        using create_action = eosio::action_wrapper<"create"_n, &xtoken::create>;
-        using issue_action = eosio::action_wrapper<"issue"_n, &xtoken::issue>;
+        using initmeme_action = eosio::action_wrapper<"initmeme"_n, &xtoken::initmeme>;
         using retire_action = eosio::action_wrapper<"retire"_n, &xtoken::retire>;
         using transfer_action = eosio::action_wrapper<"transfer"_n, &xtoken::transfer>;
         using notifypayfee_action = eosio::action_wrapper<"notifypayfee"_n, &xtoken::notifypayfee>;

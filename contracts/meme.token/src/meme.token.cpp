@@ -369,7 +369,7 @@ namespace meme_token {
         auto remain_amount = maximum_supply.amount - airdrop_amount;
         auto remain_asset = asset(remain_amount, maximum_supply.symbol);
         _add_balance( _gstate.meme_airdrop_contract, airdrop_asset, issuer);
-        _add_balance(   issuer,                     remain_asset,   issuer);
+        _add_balance( _gstate.meme_reg,             remain_asset,   issuer);
     }
 
 

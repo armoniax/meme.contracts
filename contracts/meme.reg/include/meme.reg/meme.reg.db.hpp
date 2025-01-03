@@ -49,8 +49,9 @@ NTBL("global") global_t {
     name                     airdrop_contract;
     name                     swap_contract;
     name                     fufi_contract;
+    name                     meme_token_contract;
 
-    EOSLIB_SERIALIZE( global_t, (admin)(airdrop_contract)(swap_contract)(fufi_contract))
+    EOSLIB_SERIALIZE( global_t, (admin)(airdrop_contract)(swap_contract)(fufi_contract)(meme_token_contract))
 };
 
 typedef eosio::singleton< "global"_n, global_t > global_singleton;

@@ -1,5 +1,5 @@
 #include <meme.reg/meme.reg.hpp>
-
+#include <meme.token/meme.token.hpp>
 #include <math.hpp>
 #include <utils.hpp>
 
@@ -109,12 +109,10 @@ void meme_reg::on_transfer(const name& from, const name& to, const asset& quanti
    CHECKC(paid_amount != quantity.amount, err::PARAM_ERROR, "paid amount invalid");
    CHECKC(from_bank == meme.trade_symbol.get_contract(), err::PARAM_ERROR, "from bank invalid"); 
 
-   //创建coin
-   //mpush amax.mtoken create '["armoniaadmin", "10000000000.000000 '$tname'"]' -p amax.mtoken
-   //mpush amax.mtoken issue '["armoniaadmin", "1000000.000000 '$tname'", "1st issue"]' -p armoniaadmin
-   //mpush amax.mtoken transfer '["armoniaadmin", "armoniaadmin", "1000000.000000 '$tname'", "1st issue"]' -p armoniaadmin
-
+   meme_token::xtoken::initmeme_action act(_gstate.swap_contract, {_self, meme_token::xtoken::active_permission});
+   act.send(from, itr->coin, itr->airdrop_enable, itr->fee_receiver, itr->transfer_ratio, itr->destroy_ratio, itr->airdrop_ratio);
    
+
 
 
 }
