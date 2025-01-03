@@ -1,8 +1,7 @@
-#include <meme.regbp/meme.regbp.hpp>
+#include <meme.reg/meme.reg.hpp>
 
 #include <math.hpp>
 #include <utils.hpp>
-#include "mdao.info/mdao.info.db.hpp"
 
 #define ALLOT_APPLE(farm_contract, lease_id, to, quantity, memo) \
     {   aplink::farm::allot_action(farm_contract, { {_self, active_perm} }).send( \
@@ -40,133 +39,81 @@ namespace db {
 
 using namespace std;
 using namespace amax;
-using namespace mdao;
 
 #define CHECKC(exp, code, msg) \
    { if (!(exp)) eosio::check(false, string("[[") + to_string((int)code) + string("]] ")  \
                                     + string("[[") + _self.to_string() + string("]] ") + msg); }
 
 
-   void meme_regbp::init( const name& admin){
+   void meme_reg::init( const name& admin, const name& swap_contract, const name& fufi_contract, const name& airdrop_contract){
       require_auth( _self );
 
       CHECKC( is_account(admin),err::ACCOUNT_INVALID,"admin invalid:" + admin.to_string())
-      // CHECKC( is_account(dao_contract),err::ACCOUNT_INVALID,"dao_contract invalid:" + dao_contract.to_string())
-
-      _gstate.admin = admin;
-      // _gstate.dao_contract = dao_contract;
-
+      _gstate.admin              = admin;
+      _gstate.swap_contract      = swap_contract;
+      _gstate.fufi_contract      = fufi_contract;
+      _gstate.airdrop_contract   = airdrop_contract;
    }
-   
 
-   void meme_regbp::applybp(const name& owner,
-                              const string& logo_uri,
-                              const string& org_name,
-                              const string& org_info,
-                              const name& dao_code,
-                              const string& reward_shared_plan,
-                              const string& manifesto,
-                              const string& issuance_plan){
+   void meme_reg::applymeme(const name& owner, 
+                     const asset&      coin,
+                     const string&     disc,
+                     const string&     icon_url, 
+                     const string&     urls,
+                     const uint64_t&   airdrop_ratio,
+                     const uint64_t&   destroy_ratio,      //转账手续费销毁
+                     const uint64_t&   transfer_ratio,
+                     const name&       fee_receiver, //转账手续费接收账户
+                     const bool&       airdrop_enable,
+                     const extended_symbol&  trade_symbol,
+                     const uint64_t&         init_price){
       require_auth( owner );
-
-      auto prod_itr = _producer_tbl.find(owner.value);
-      CHECKC( prod_itr == _producer_tbl.end(),err::RECORD_EXISTING,"Application submitted:" + owner.to_string())
-
-      _set_producer(owner,logo_uri,org_name,org_info,dao_code,reward_shared_plan,manifesto,issuance_plan);
-   }
-
-   void meme_regbp::updatebp(const name& owner,
-                              const string& logo_uri,
-                              const string& org_name,
-                              const string& org_info,
-                              const name& dao_code,
-                              const string& reward_shared_plan,
-                              const string& manifesto,
-                              const string& issuance_plan){
-
-      require_auth( owner );
-      auto prod_itr = _producer_tbl.find(owner.value);
-      CHECKC( prod_itr != _producer_tbl.end(),err::RECORD_EXISTING,"Application submitted:" + owner.to_string())
-
-      _set_producer(owner,logo_uri,org_name,org_info,dao_code,reward_shared_plan,manifesto,issuance_plan);
-   }
-
-   void meme_regbp::addproducer(const name& submiter,
-                              const name& owner,
-                              const string& logo_uri,
-                              const string& org_name,
-                              const string& org_info,
-                              const name& dao_code,
-                              const string& reward_shared_plan,
-                              const string& manifesto,
-                              const string& issuance_plan){
-      require_auth( submiter );
-      CHECKC( submiter == _gstate.admin,err::NO_AUTH,"Missing required authority of admin" )
-
-      _set_producer(owner,logo_uri,org_name,org_info,dao_code,reward_shared_plan,manifesto,issuance_plan);
-   }
-
-
-   void meme_regbp::setstatus( const name& submiter, const name& owner, const name& status){
-
-      require_auth( submiter );
-      CHECKC( submiter == _gstate.admin,err::NO_AUTH,"Missing required authority of admin" )
-
-      auto prod_itr = _producer_tbl.find(owner.value);
-      CHECKC( prod_itr != _producer_tbl.end(),err::RECORD_NOT_FOUND,"producer not found:" + owner.to_string())
-      CHECKC( prod_itr-> status != status, err::STATUS_ERROR,"No changes" )
-      CHECKC( status == ProducerStatus::ENABLE ||  status == ProducerStatus::DISABLE,err::PARAM_ERROR,"Unsupported state")
+      auto itr = _meme_tbl.find(coin.symbol.raw());
+      if(itr != _meme_tbl.end()){
+         CHECKC(false, err::RECORD_NOT_FOUND, "meme already exists");
+      }
       
-      db::set(_producer_tbl, prod_itr, _self , [&]( auto& p, bool is_new ) {
-         if (is_new) {
-            p.owner        =  owner;
-            p.created_at   = current_time_point();
-         }
-         p.status          = status;
-         p.updated_at      = current_time_point();
+      _meme_tbl.emplace(owner, [&](auto &m) {
+         m.owner           = owner;
+         m.coin            = coin;
+         m.disc            = disc;
+         m.icon_url        = icon_url;
+         m.urls            = urls;
+         m.airdrop_ratio   = airdrop_ratio;
+         m.destroy_ratio   = destroy_ratio;
+         m.transfer_ratio  = transfer_ratio;
+         m.fee_receiver    = fee_receiver;
+         m.airdrop_enable  = airdrop_enable;
+         m.trade_symbol    = trade_symbol;   
+         m.init_price      = init_price;
+         m.created_at      = current_time_point();
+         m.updated_at      = current_time_point();
       });
-   
+}
+
+
+void meme_reg::on_transfer(const name& from, const name& to, const asset& quantity, const string& memo){
+   if(from == _self || to != _self){
+      return;
    }
+   auto from_bank =  get_first_receiver();
+   auto symbol = quantity.symbol;
+   auto itr = _meme_tbl.find(symbol.raw());
+   CHECKC(itr == _meme_tbl.end(),   err::RECORD_NOT_FOUND, "meme not exists");  
+   CHECKC(itr->owner == from,       err::ACCOUNT_INVALID, "account invalid");
 
-   void meme_regbp::_set_producer(const name& owner,
-                              const string& logo_uri,
-                              const string& org_name,
-                              const string& org_info,
-                              const name& dao_code,
-                              const string& reward_shared_plan,
-                              const string& manifesto,
-                              const string& issuance_plan){
-      CHECKC( logo_uri.size() <= MAX_LOGO_SIZE ,err::OVERSIZED ,"logo size must be <= " + to_string(MAX_LOGO_SIZE))
-      CHECKC( org_name.size() <= MAX_TITLE_SIZE ,err::OVERSIZED ,"org_name size must be <= " + to_string(MAX_TITLE_SIZE))
-      CHECKC( org_info.size() <= MAX_TITLE_SIZE ,err::OVERSIZED ,"org_info size must be <= " + to_string(MAX_TITLE_SIZE))
-      // CHECKC( manifesto.size() <= MAX_TITLE_SIZE ,err::OVERSIZED ,"manifesto size must be <= " + to_string(MAX_TITLE_SIZE))
-      CHECKC( issuance_plan.size() <= MAX_TITLE_SIZE ,err::OVERSIZED ,"issuance_plan size must be <= " + to_string(MAX_TITLE_SIZE))
-      CHECKC( reward_shared_plan.size() <= MAX_TITLE_SIZE, err::OVERSIZED, "reward_shared_ratio is too large than 10000");
+   auto& meme = *itr;
+   auto paid_amount = meme.coin.amount/100000000 * meme.init_price;
+   CHECKC(paid_amount != quantity.amount, err::PARAM_ERROR, "paid amount invalid");
+   CHECKC(from_bank == meme.trade_symbol.get_contract(), err::PARAM_ERROR, "from bank invalid"); 
 
-      // dao_info_t::idx_t dao_info( _gstate.dao_contract, _gstate.dao_contract.value);
+   //创建coin
+   //mpush amax.mtoken create '["armoniaadmin", "10000000000.000000 '$tname'"]' -p amax.mtoken
+   //mpush amax.mtoken issue '["armoniaadmin", "1000000.000000 '$tname'", "1st issue"]' -p armoniaadmin
+   //mpush amax.mtoken transfer '["armoniaadmin", "armoniaadmin", "1000000.000000 '$tname'", "1st issue"]' -p armoniaadmin
 
-      // auto dao_itr = dao_info.find( dao_code.value);
-      // CHECKC( dao_itr != dao_info.end(),err::RECORD_NOT_FOUND,"dao_code does not exist:" + dao_code.to_string())
 
-      auto prod_itr = _producer_tbl.find(owner.value);
-      // CHECKC( prod_itr != _producer_tbl.end(),err::RECORD_EXISTING,"Application submitted:" + owner.to_string())
 
-      db::set(_producer_tbl, prod_itr, _self, [&]( auto& p, bool is_new ) {
-         if (is_new) {
-            p.owner =  owner;
-            p.created_at = current_time_point();
-            p.status = ProducerStatus::DISABLE;
-         }
-
-         p.logo_uri              = logo_uri;
-         p.org_name              = org_name;
-         p.org_info              = org_info;
-         p.dao_code              = dao_code;
-         p.reward_shared_plan    = reward_shared_plan;
-         p.manifesto            = manifesto;
-         p.issuance_plan         = issuance_plan;
-         // p.last_edited_at        = current_time_point();
-      });
-   }
+}
 
 }//namespace amax

@@ -25,8 +25,8 @@ using namespace eosio;
 static constexpr uint32_t MAX_LOGO_SIZE        = 512;
 static constexpr uint32_t MAX_TITLE_SIZE        = 2048;
 
-#define TBL struct [[eosio::table, eosio::contract("meme.regbp")]]
-#define NTBL(name) struct [[eosio::table(name), eosio::contract("meme.regbp")]]
+#define TBL struct [[eosio::table, eosio::contract("meme.reg")]]
+#define NTBL(name) struct [[eosio::table(name), eosio::contract("meme.reg")]]
 
 namespace ProducerStatus {
     static constexpr eosio::name DISABLE     { "disable"_n   };
@@ -46,54 +46,42 @@ typedef std::variant<eosio::public_key, string> recover_target_type;
 
 NTBL("global") global_t {
     name                     admin;   
-    name                     dao_contract = "mdao.info"_n;
+    name                     airdrop_contract;
+    name                     swap_contract;
+    name                     fufi_contract;
 
-    EOSLIB_SERIALIZE( global_t, (admin)(dao_contract))
+    EOSLIB_SERIALIZE( global_t, (admin)(airdrop_contract)(swap_contract)(fufi_contract))
 };
 
 typedef eosio::singleton< "global"_n, global_t > global_singleton;
 
 //scope: _self
-TBL producer_t {
-    name                        owner; 
-    string                      logo_uri;       
-    string                      org_name;                   // cn:xxx|en:xxX
-    string                      org_info;                   // web:xxx|tw:xxx|tg:xxX
-    name                        dao_code;                   
-    uint32_t                    reward_shared_ratio = 0;         
-    string                      manifesto;                 // cn:xxx|en:xxx
-    string                      issuance_plan;              // cn:xxx|en:xxx
-    string                      reward_shared_plan;         // cn:xxx|en:xxx
-    name                        status;                     // disable | enable
-    time_point_sec              created_at;
-    time_point_sec              updated_at;
-    // time_point_sec              last_edited_at;           
-    
-    producer_t() {}
-    producer_t(const name& i): owner(i) {}
+TBL meme_t {
+    name                    owner;              //sequence
+    asset                   coin;               //PK
+    string                  disc;
+    string                  icon_url;           //logo
+    string                  urls;    
+    uint64_t                airdrop_ratio;      //空投比例
+    uint64_t                destroy_ratio;      //转账手续费销毁
+    uint64_t                transfer_ratio;     //转账手续费比例
+    name                    fee_receiver;       //转账手续费接收账户
+    bool                    airdrop_enable;     //是否开启空投
+    extended_symbol         trade_symbol;       //交易对
+    uint64_t                init_price;        
+    name                    status;             //状态  enable disable
+    time_point_sec          created_at;
+    time_point_sec          updated_at;
+    meme_t() {}
+    meme_t(const name& i): owner(i) {}
 
-    uint64_t primary_key()const { return owner.value ; }
+    uint64_t primary_key()const { return coin.symbol.code().raw() ; }
 
-    typedef eosio::multi_index< "producers"_n,  producer_t> table;
+    typedef eosio::multi_index< "memes"_n,  meme_t> table;
 
-    EOSLIB_SERIALIZE( producer_t, (owner)(logo_uri)(org_name)(org_info)
-                                    (dao_code)(reward_shared_ratio)(manifesto)(issuance_plan)
-                                    (reward_shared_plan)(status)
-                                    (created_at)(updated_at))
-};
-
-TBL auth_t {
-    name                        auth;              //PK
-    set<name>                   actions;              //set of action types
-
-    auth_t() {}
-    auth_t(const name& i): auth(i) {}
-
-    uint64_t primary_key()const { return auth.value; }
-
-    typedef eosio::multi_index< "auths"_n,  auth_t > idx_t;
-
-    EOSLIB_SERIALIZE( auth_t, (auth)(actions) )
+    EOSLIB_SERIALIZE( meme_t,   (owner)(coin)(disc)(icon_url)
+                                (airdrop_ratio)(transfer_ratio)(fee_receiver)
+                                (airdrop_enable)(trade_symbol)(init_price)(status)(urls)(created_at)(updated_at))
 };
 
 

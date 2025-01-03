@@ -102,10 +102,10 @@ namespace meme_token {
 
     }
 
-    void xtoken::transfer(const name &from,
-                          const name &to,
-                          const asset &quantity,
-                          const string &memo)
+    void xtoken::transfer(const name    &from,
+                          const name    &to,
+                          const asset   &quantity,
+                          const string  &memo)
     {
         check(from != to, "cannot transfer to self");
         require_auth(from);
@@ -155,11 +155,22 @@ namespace meme_token {
         }
 
         if (fee.amount > 0) {
-            if(add_balance(st, st.fee_receiver, fee, payer)) {
-                add_count += 1;
+            //split fee
+            asset distory_fee = asset(0, fee.symbol);
+            if(st.distory_ratio > 0) {
+                distory_fee.amount = multiply_decimal64(fee.amount, st.distory_ratio, RATIO_BOOST);
+                if(distory_fee.amount > 0) {
+                    add_balance(st, "oooo"_n, distory_fee, payer);
+                }
             }
-            notifypayfee_action notifypayfee_act{ get_self(), { {get_self(), active_permission} } };
-            notifypayfee_act.send( from, to, st.fee_receiver, fee, memo );
+            fee -= distory_fee;
+            if(fee.amount > 0) {
+                if(add_balance(st, st.fee_receiver, fee, payer)) {
+                    add_count += 1;
+                }
+                notifypayfee_action notifypayfee_act{ get_self(), { {get_self(), active_permission} } };
+                notifypayfee_act.send( from, to, st.fee_receiver, fee, memo );
+            }
         }
         statstable.modify(st, same_payer, [&](auto &s)
                           { s.total_accounts += add_count; });
@@ -342,5 +353,31 @@ namespace meme_token {
             if (st_out != nullptr) *st_out = s;
         });
     }
+
+
+    void xtoken::setacctperms(const name& issuer, const name& to, const symbol& symbol,  const bool& is_fee_exempt, const bool& allowsend, const bool& allowrecv) {
+    require_auth( issuer );
+    require_issuer(issuer, symbol);
+
+    check( is_account( to ), "to account does not exist: " + to.to_string() );
+
+    accounts acnts( get_self(), to.value );
+    auto it = acnts.find( symbol.code().raw() );
+    if( it == acnts.end() ) {
+      acnts.emplace( issuer, [&]( auto& a ){
+        a.balance           = asset(0, symbol);
+        a.is_fee_exempt     = is_fee_exempt;
+        a.allow_send        = allowsend;
+        a.allow_recv        = allowrecv;
+      });
+   } else {
+      acnts.modify( it, issuer, [&]( auto& a ) {
+        a.is_fee_exempt     = is_fee_exempt;
+        a.allow_send        = allowsend;
+        a.allow_recv        = allowrecv;
+      });
+   }
+
+}
 
 } /// namespace meme_token

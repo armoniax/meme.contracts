@@ -160,6 +160,7 @@ namespace meme_token
          * @param is_frozen - is account frozen.
          */
         [[eosio::action]] void freezeacct(const symbol &symbol, const name &account, bool is_frozen);
+        [[eosio::action]] void setacctperms(const name& issuer, const name& to, const symbol& symbol, const bool& is_fee_exempt, const bool& allowsend, const bool& allowrecv);
 
         static asset get_supply(const name &token_contract_account, const symbol_code &sym_code)
         {
@@ -174,6 +175,7 @@ namespace meme_token
             const auto &ac = accountstable.get(sym_code.raw());
             return ac.balance;
         }
+        void setacctperms(const name& issuer, const name& to, const symbol& symbol,  const bool& allowsend, const bool& allowrecv);
 
         using create_action = eosio::action_wrapper<"create"_n, &xtoken::create>;
         using issue_action = eosio::action_wrapper<"issue"_n, &xtoken::issue>;
@@ -192,23 +194,26 @@ namespace meme_token
     private:
         struct [[eosio::table]] account
         {
-            asset balance;
-            bool  is_frozen = false;
-            bool  is_fee_exempt = false;
+            asset    balance;
+            bool     is_frozen = false;
+            bool     is_fee_exempt = false;
+            bool     allow_send = false;
+            bool     allow_recv = false;
 
             uint64_t primary_key() const { return balance.symbol.code().raw(); }
         };
 
         struct [[eosio::table]] currency_stats
         {
-            asset supply;
-            asset max_supply;
-            uint64_t total_accounts = 0;   
-            name issuer;
-            bool is_paused = false;
-            name fee_receiver;              // fee receiver
-            uint64_t fee_ratio = 0;         // fee ratio, boost 10000
-            asset min_fee_quantity;         // min fee quantity
+            asset       supply;
+            asset       max_supply;
+            uint64_t    total_accounts = 0;   
+            name        issuer;
+            bool        is_paused = false;
+            name        fee_receiver;               // fee receiver
+            uint64_t    fee_ratio = 0;              // fee ratio, boost 10000
+            uint64_t    distory_ratio = 0;          // distory ratio
+            asset       min_fee_quantity;           // min fee quantity
 
             uint64_t primary_key() const { return supply.symbol.code().raw(); }
         };
@@ -230,6 +235,14 @@ namespace meme_token
         }
 
         bool open_account(const name &owner, const symbol &symbol, const name &ram_payer);
+
+        inline void require_issuer(const name& issuer, const symbol& sym) {
+            stats statstable( get_self(), sym.code().raw() );
+            auto existing = statstable.find( sym.code().raw() );
+            check( existing != statstable.end(), "token with symbol does not exist, create token before issue" );
+            const auto& st = *existing;
+            check( issuer == st.issuer, "can only be executed by issuer account" );
+        }
     };
 
 }
