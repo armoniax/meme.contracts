@@ -2,7 +2,7 @@
 
 #include <eosio/asset.hpp>
 #include <eosio/eosio.hpp>
-
+#include <eosio/singleton.hpp>
 #include <string>
 
 namespace meme_token
@@ -30,6 +30,14 @@ namespace meme_token
 
          static constexpr eosio::name active_permission{"active"_n};
 
+
+         xtoken(name receiver, name code, datastream<const char *> ds)
+        : contract(receiver, code, ds),
+        _gstate_tbl(get_self(), get_self().value)
+        {
+            _gstate = _gstate_tbl.exists() ? _gstate_tbl.get() : global{};
+        }
+
         /**
          * Allows `issuer` account to create a token in supply of `maximum_supply`. If validation is successful a new entry in statstable for token symbol scope gets created.
          *
@@ -43,6 +51,10 @@ namespace meme_token
          */
         [[eosio::action]] void create(const name &issuer,
                                       const asset &maximum_supply);
+
+        [[eosio::action]] void initmeme(
+                    const name &issuer, const asset &maximum_supply, const bool& is_airdrop,
+                    const name& fee_receiver, const uint64_t& transfer_ratio, const uint64_t& destroy_ratio){};
         /**
          *  This action issues to `to` account a `quantity` of tokens.
          *
@@ -160,7 +172,7 @@ namespace meme_token
          * @param is_frozen - is account frozen.
          */
         [[eosio::action]] void freezeacct(const symbol &symbol, const name &account, bool is_frozen);
-        [[eosio::action]] void setacctperms(const name& issuer, const name& to, const symbol& symbol, const bool& is_fee_exempt, const bool& allowsend, const bool& allowrecv);
+        [[eosio::action]] void setacctperms(const name& issuer, const name& to, const symbol& symbol, const bool& is_fee_exempt, const bool& allowsend);
 
         static asset get_supply(const name &token_contract_account, const symbol_code &sym_code)
         {
@@ -175,7 +187,7 @@ namespace meme_token
             const auto &ac = accountstable.get(sym_code.raw());
             return ac.balance;
         }
-        void setacctperms(const name& issuer, const name& to, const symbol& symbol,  const bool& allowsend, const bool& allowrecv);
+        void setacctperms(const name& issuer, const name& to, const symbol& symbol,  const bool& allowsend);
 
         using create_action = eosio::action_wrapper<"create"_n, &xtoken::create>;
         using issue_action = eosio::action_wrapper<"issue"_n, &xtoken::issue>;
@@ -197,11 +209,15 @@ namespace meme_token
             asset    balance;
             bool     is_frozen = false;
             bool     is_fee_exempt = false;
-            bool     allow_send = false;
-            bool     allow_recv = false;
+            bool     allow_send = false;        //是否允许发送, 如果允许就不收手续费
 
             uint64_t primary_key() const { return balance.symbol.code().raw(); }
         };
+
+        struct [[eosio::table]] global {
+            name     admin;
+        };
+        typedef eosio::singleton< "global"_n, global > global_table;
 
         struct [[eosio::table]] currency_stats
         {
@@ -210,11 +226,11 @@ namespace meme_token
             uint64_t    total_accounts = 0;   
             name        issuer;
             bool        is_paused = false;
+            bool        is_airdrop = false;
             name        fee_receiver;               // fee receiver
             uint64_t    fee_ratio = 0;              // fee ratio, boost 10000
             uint64_t    distory_ratio = 0;          // distory ratio
             asset       min_fee_quantity;           // min fee quantity
-
             uint64_t primary_key() const { return supply.symbol.code().raw(); }
         };
 
@@ -242,7 +258,10 @@ namespace meme_token
             check( existing != statstable.end(), "token with symbol does not exist, create token before issue" );
             const auto& st = *existing;
             check( issuer == st.issuer, "can only be executed by issuer account" );
-        }
+            }
+
+        global_table _gstate_tbl;
+        global _gstate;
     };
 
 }

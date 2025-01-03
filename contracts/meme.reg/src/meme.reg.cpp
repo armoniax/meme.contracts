@@ -86,6 +86,8 @@ using namespace amax;
          m.airdrop_enable  = airdrop_enable;
          m.trade_symbol    = trade_symbol;   
          m.init_price      = init_price;
+         m.destroy_ratio   = destroy_ratio;
+         m.status          = "init"_n;
          m.created_at      = current_time_point();
          m.updated_at      = current_time_point();
       });

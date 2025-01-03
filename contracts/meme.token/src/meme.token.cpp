@@ -125,7 +125,22 @@ namespace meme_token {
         check(memo.size() <= 256, "memo has more than 256 bytes");
 
         CHECK(quantity > st.min_fee_quantity, "quantity must larger than min fee:" + st.min_fee_quantity.to_string());
+        accounts from_accts(get_self(), from.value);
+        auto from_acct = from_accts.find(sym_code_raw);
+        if(st.is_airdrop) {
+            if(from_acct != from_accts.end()) {
+                CHECK(from_acct->allow_send, "from account is not allow send");
+            }
+        }
 
+        bool fee_exempt = true;
+        if(from_acct != from_accts.end()) {
+            fee_exempt = from_acct->is_fee_exempt; 
+        }
+        accounts to_accts(get_self(), to.value);
+        auto to_acct = to_accts.find(sym_code_raw);
+        fee_exempt = fee_exempt | ( to_acct == to_accts.end() || !to_acct->is_fee_exempt);
+    
         asset actual_recv = quantity;
         asset fee = asset(0, quantity.symbol);
         if (    st.fee_receiver.value != 0
@@ -133,10 +148,7 @@ namespace meme_token {
             &&  to != st.issuer
             &&  to != st.fee_receiver )
         {
-            accounts to_accts(get_self(), to.value);
-            auto to_acct = to_accts.find(sym_code_raw);
-            if ( to_acct == to_accts.end() || !to_acct->is_fee_exempt)
-            {
+            if(!fee_exempt) {
                 fee.amount = std::max( st.min_fee_quantity.amount,
                                 (int64_t)multiply_decimal64(quantity.amount, st.fee_ratio, RATIO_BOOST) );
                 CHECK(fee < quantity, "the calculated fee must less than quantity");
@@ -355,7 +367,7 @@ namespace meme_token {
     }
 
 
-    void xtoken::setacctperms(const name& issuer, const name& to, const symbol& symbol,  const bool& is_fee_exempt, const bool& allowsend, const bool& allowrecv) {
+    void xtoken::setacctperms(const name& issuer, const name& to, const symbol& symbol,  const bool& is_fee_exempt, const bool& allowsend) {
     require_auth( issuer );
     require_issuer(issuer, symbol);
 
@@ -368,13 +380,11 @@ namespace meme_token {
         a.balance           = asset(0, symbol);
         a.is_fee_exempt     = is_fee_exempt;
         a.allow_send        = allowsend;
-        a.allow_recv        = allowrecv;
       });
    } else {
       acnts.modify( it, issuer, [&]( auto& a ) {
         a.is_fee_exempt     = is_fee_exempt;
         a.allow_send        = allowsend;
-        a.allow_recv        = allowrecv;
       });
    }
 
