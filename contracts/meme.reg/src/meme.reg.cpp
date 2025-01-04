@@ -95,13 +95,14 @@ void meme_reg::on_transfer(const name& from, const name& to, const asset& quanti
    CHECKC(paid_amount != quantity.amount, err::PARAM_ERROR, "paid amount invalid");
    CHECKC(from_bank == meme.trade_symbol.get_contract(), err::PARAM_ERROR, "from bank invalid"); 
 
-
    auto airdrop_amount = meme.coin.amount * meme.airdrop_ratio / RATIO_BOOST;
    auto airdrop_asset = asset(airdrop_amount, meme.coin.symbol);
    meme_token::xtoken::initmeme_action act(_gstate.swap_contract, {_self, meme_token::xtoken::active_permission});
    act.send(from, itr->coin, itr->airdrop_enable, itr->fee_receiver, itr->transfer_ratio, itr->destroy_ratio, airdrop_asset);
 
-   // _create_hootswap(from, to, quantity, memo);
+   extended_asset sell_ex_quant = extended_asset{itr->coin, _self};
+   extended_asset buy_ex_quant = extended_asset{airdrop_asset, _gstate.airdrop_contract};
+   _create_hootswap(sell_ex_quant, buy_ex_quant);
    
    TRANSFER(_gstate.meme_token_contract, _self, itr->coin, "meme init");
    TRANSFER(from_bank, _self, quantity, "meme init");
