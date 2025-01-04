@@ -1,42 +1,25 @@
 #include <meme.reg/meme.reg.hpp>
 #include <meme.token/meme.token.hpp>
+#include <hoot.swap/hoot.swap.hpp>
+#include <amax.token/amax.token.hpp>
+#include <chrono>
 #include <math.hpp>
 #include <utils.hpp>
+#include <eosio/eosio.hpp>
+#include <eosio/permission.hpp>
 
-#define ALLOT_APPLE(farm_contract, lease_id, to, quantity, memo) \
-    {   aplink::farm::allot_action(farm_contract, { {_self, active_perm} }).send( \
-            lease_id, to, quantity, memo );}
-
-namespace amax {
-
-
-namespace db {
-
-    template<typename table, typename Lambda>
-    inline void set(table &tbl,  typename table::const_iterator& itr, const eosio::name& emplaced_payer,
-            const eosio::name& modified_payer, Lambda&& setter )
-   {
-        if (itr == tbl.end()) {
-            tbl.emplace(emplaced_payer, [&]( auto& p ) {
-               setter(p, true);
-            });
-        } else {
-            tbl.modify(itr, modified_payer, [&]( auto& p ) {
-               setter(p, false);
-            });
-        }
+#define TOKEN_TRANSFER(bank, to, quantity, memo)                                                                                           \
+    {                                                                                                                                      \
+        token::transfer_action act{bank, {{_self, meme_token::xtoken::active_permission}}};                                                                    \
+        act.send(_self, to, quantity, memo);                                                                                               \
+    }
+#define CREATEHOOTSWAP(contract, user, pool1, pool2, liquidity_symbol)                                                                     \
+    {                                                                                                                                      \
+        hootswap::create_pool_action act{contract, {{_self, meme_token::xtoken::active_permission}}};                                                          \
+        act.send(user, pool1, pool2, liquidity_symbol);                                                                                    \
     }
 
-    template<typename table, typename Lambda>
-    inline void set(table &tbl,  typename table::const_iterator& itr, const eosio::name& emplaced_payer,
-               Lambda&& setter )
-   {
-      set(tbl, itr, emplaced_payer, eosio::same_payer, setter);
-   }
-
-}// namespace db
-
-
+namespace meme {
 using namespace std;
 using namespace amax;
 
@@ -111,10 +94,52 @@ void meme_reg::on_transfer(const name& from, const name& to, const asset& quanti
 
    meme_token::xtoken::initmeme_action act(_gstate.swap_contract, {_self, meme_token::xtoken::active_permission});
    act.send(from, itr->coin, itr->airdrop_enable, itr->fee_receiver, itr->transfer_ratio, itr->destroy_ratio, itr->airdrop_ratio);
+
+   // _create_hootswap(from, to, quantity, memo);
    
+   TRANSFER(_gstate.meme_token_contract, _self, itr->coin, "meme init");
+   TRANSFER(from_bank, _self, quantity, "meme init");
+}
 
+void meme_reg::_create_hootswap(const extended_asset& sell_ex_quant, const extended_asset& buy_ex_quant){
+   auto from= _self;
+   auto pool1 = sell_ex_quant;
+   auto pool2 = buy_ex_quant;
+   if (pool1.quantity.symbol.code().to_string() > pool2.quantity.symbol.code().to_string()) {
+      auto pool_swap = pool1;
+      pool1          = pool2;
+      pool2          = pool_swap;
+   }
+   bool is_exists = amax::hootswap::is_exists_pool(_gstate.swap_contract, pool1.get_extended_symbol(), pool2.get_extended_symbol());
+   CHECKC(!is_exists, err::RECORD_EXISTING, "pool already exists");
 
+   auto sympair   = amax::hootswap::pool_symbol(pool1.quantity.symbol, pool2.quantity.symbol);
+   auto liquidity_symbol_string = add_symbol(pool1.quantity.symbol, pool2.quantity.symbol, 1);
+   
+   CREATEHOOTSWAP(_gstate.swap_contract,
+             _self, pool1.get_extended_symbol(), pool2.get_extended_symbol(), 
+             symbol_code(liquidity_symbol_string))
+
+   TOKEN_TRANSFER(pool1.contract,
+                  _gstate.swap_contract,
+                  pool1.quantity,
+                  "mint:" + sympair.to_string() + ":1:" + to_string(_rand(from, 0xFFFFFFFFFFFFFFFF)) + ":" + from.to_string())
+   TOKEN_TRANSFER(pool2.contract,
+                  _gstate.swap_contract,
+                  pool2.quantity,
+                  "mint:" + sympair.to_string() + ":2:" + to_string(_rand(from, 0xFFFFFFFFFFFFFFFF)) + ":" + from.to_string())
 
 }
 
-}//namespace amax
+uint64_t meme_reg::_rand(const name& user, const uint64_t& range) {
+    auto        mixd      = tapos_block_prefix() * tapos_block_num() + user.value + current_time_point().sec_since_epoch();
+    const char* mixedChar = reinterpret_cast<const char*>(&mixd);
+    auto        result    = sha256((char*)mixedChar, sizeof(mixedChar));
+    uint64_t    num1      = (uint64_t)(result.data()[0]) + (uint64_t)(result.data()[8]) * 10 + (uint64_t)(result.data()[16]) * 100 +
+                    (uint64_t)(result.data()[24]) * 1000;
+    uint64_t random_num = (num1 % range);
+    return random_num;
+}
+
+
+} // namespace meme

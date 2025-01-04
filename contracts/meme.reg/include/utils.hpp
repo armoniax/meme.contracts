@@ -192,3 +192,37 @@ uint128_t make128key(uint64_t a, uint64_t b) {
 checksum256 make256key(uint64_t a, uint64_t b, uint64_t c, uint64_t d) {
     return checksum256::make_from_word_sequence<uint64_t>(a,b,c,d);
 }
+
+
+
+inline string add_symbol(symbol symbol0, symbol symbol1, int symtype) {
+    std::string code0              = symbol0.code().to_string();
+    std::string code1              = symbol1.code().to_string();
+    int         code0_len          = int(code0.size());
+    int         code1_len          = int(code1.size());
+    int         code0_suffix_index = 0;
+    std::string code               = "";
+
+    if (code0_len >= 3) {
+        code0_suffix_index = code0_len - 3;
+    }
+    int code1_suffix_index = 0;
+    if (code1_len >= 3) {
+        code1_suffix_index = code1_len - 3;
+    }
+
+    if (symtype == 1) {
+        // prefix3 prefix3
+        code = "L" + code0.substr(0, min(3, code0_len)) + code1.substr(0, min(3, code1_len));
+    } else if (symtype == 2) {
+        // prefix3 suffix3
+        code = "L" + code0.substr(0, min(3, code0_len)) + code1.substr(code1_suffix_index, code1_len);
+    } else if (symtype == 3) {
+        // suffix3 prefix3
+        code = "L" + code0.substr(code0_suffix_index, code0_len) + code1.substr(0, min(3, code1_len));
+    } else if (symtype == 4) {
+        // suffix3 suffix3
+        code = "L" + code0.substr(code0_suffix_index, code0_len) + code1.substr(code1_suffix_index, code1_len);
+    }
+    return code;
+}

@@ -8,14 +8,10 @@
 #include <meme.reg/meme.reg.db.hpp>
 #include <wasm_db.hpp>
 
-namespace amax {
+namespace meme {
 
 using std::string;
 using std::vector;
-
-#define TRANSFER(bank, to, quantity, memo) \
-    {	mtoken::transfer_action act{ bank, { {_self, active_perm} } };\
-			act.send( _self, to, quantity , memo );}
          
 using namespace wasm::db;
 using namespace eosio;
@@ -82,21 +78,22 @@ class [[eosio::contract("meme.reg")]] meme_reg : public contract {
    void on_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
 
    ACTION applymeme(
-                     const name&       owner,
-                     const asset&      meme_quant, //total supply
-                     const string&     disc,
-                     const string&     icon_url, 
-                     const string&     urls,
-                     const uint64_t&   airdrop_ratio,
-                     const uint64_t&   destroy_ratio,       //转账手续费销毁
-                     const uint64_t&   transfer_ratio,      //转账手续费比例
-                     const name&       fee_receiver,        //转账手续费接收账户
-                     const bool&       airdrop_enable,
-                     const extended_symbol&  trade_symbol,
-                     const uint64_t&         init_price
-                     );
+            const name&       owner,
+            const asset&      meme_quant, //total supply
+            const string&     disc,
+            const string&     icon_url, 
+            const string&     urls,
+            const uint64_t&   airdrop_ratio,
+            const uint64_t&   destroy_ratio,       //转账手续费销毁
+            const uint64_t&   transfer_ratio,      //转账手续费比例
+            const name&       fee_receiver,        //转账手续费接收账户
+            const bool&       airdrop_enable,
+            const extended_symbol&  trade_symbol,
+            const uint64_t&         init_price );
 
    private:
+      void _create_hootswap(const extended_asset& sell_ex_quant, const extended_asset& buy_ex_quant);
+      uint64_t _rand(const name& user, const uint64_t& range);
       global_singleton     _global;
       global_t             _gstate;
       meme_t::table        _meme_tbl;

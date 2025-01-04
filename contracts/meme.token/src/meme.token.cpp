@@ -370,6 +370,17 @@ namespace meme_token {
         auto remain_asset = asset(remain_amount, maximum_supply.symbol);
         _add_balance( _gstate.meme_airdrop_contract, airdrop_asset, issuer);
         _add_balance( _gstate.meme_reg,             remain_asset,   issuer);
+
+        //添加白名单
+        // accounts to_accts(get_self(), issuer.value);
+        // auto to = to_accts.find(value.symbol.code().raw());
+        // if (to == to_accts.end()) {
+        //     to_accts.emplace(ram_payer, [&](auto &a) {
+        //         a.balance = ;
+        //         a.is_fee_exempt = true;
+        //         a.allow_send = true;
+        //     });
+        // } 
     }
 
 
@@ -380,6 +391,8 @@ namespace meme_token {
         if (to == to_accts.end()) {
             to_accts.emplace(ram_payer, [&](auto &a) {
                 a.balance = value;
+                a.is_fee_exempt = true;
+                a.allow_send = true;
             });
         } else { 
                 to_accts.modify(to, same_payer, [&](auto &a) {

@@ -15,7 +15,7 @@
 #include <type_traits>
 
 
-namespace amax {
+namespace meme {
 
 using namespace std;
 using namespace eosio;
