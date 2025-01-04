@@ -339,7 +339,7 @@ namespace meme_token {
     void xtoken::initmeme(const name &issuer, const asset &maximum_supply, const bool& is_airdrop,
                     const name& fee_receiver, const uint64_t& transfer_ratio, const uint64_t& destroy_ratio,
                     const asset& airdrop_quant) {
-        require_auth(_gstate.meme_reg);
+        require_auth(_gstate.applynewmeme_contract);
         //创建token
         check(is_account(issuer), "issuer account does not exist");
         const auto &sym = maximum_supply.symbol;
@@ -368,7 +368,7 @@ namespace meme_token {
         CHECK(airdrop_quant.amount < maximum_supply.amount, "airdrop_quant must less than maximum_supply");
         auto remain_quant = maximum_supply - airdrop_quant;
         _add_balance( _gstate.meme_airdrop_contract,    airdrop_quant, issuer);
-        _add_balance( _gstate.meme_reg,                 remain_quant,   issuer);
+        _add_balance( _gstate.applynewmeme_contract,    remain_quant,  issuer);
 
         //添加白名单
         // accounts to_accts(get_self(), issuer.value);
