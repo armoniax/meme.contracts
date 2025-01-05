@@ -79,8 +79,7 @@ class [[eosio::contract("airdropmeme")]] airdropmeme : public contract {
       _global.set(_gstate, _self);
 
    }
-   ACTION airdrop(const name& to, const name& bank, const asset& quantity, const string& memo){
-   }
+   ACTION airdrop(const name& to, const name& bank, const asset& quantity, const string& memo);
 
    ACTION setairdrop(const name& owner, const extended_asset& airdrop_quant);
 
