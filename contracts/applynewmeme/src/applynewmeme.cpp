@@ -2,6 +2,7 @@
 #include <meme.token/meme.token.hpp>
 #include <hoot.swap/hoot.swap.hpp>
 #include <amax.token/amax.token.hpp>
+#include <airdropmeme/airdropmeme.hpp>
 #include <chrono>
 #include <math.hpp>
 #include <utils.hpp>
@@ -98,12 +99,13 @@ void applynewmeme::on_transfer(const name& from, const name& to, const asset& qu
    meme_token::xtoken::initmeme_action act(_gstate.swap_contract, {_self, meme_token::xtoken::active_permission});
    act.send(from, itr->total_supply.quantity, itr->airdrop_enable, itr->fee_receiver, itr->transfer_ratio, itr->destroy_ratio, airdrop_asset);
 
-   extended_asset sell_ex_quant  = itr->total_supply;
-   extended_asset buy_ex_quant   = extended_asset{quantity - airdrop_asset, from_bank};
+   extended_asset sell_ex_quant  = extended_asset{ itr->total_supply.quantity - airdrop_asset, itr->total_supply.contract};
+   extended_asset buy_ex_quant   = extended_asset{quantity, from_bank};
    _create_hootswap(sell_ex_quant, buy_ex_quant);
    
-   TRANSFER(_gstate.meme_token_contract, _self, itr->total_supply.quantity, "meme init");
-   TRANSFER(from_bank, _self, quantity, "meme init");
+   TRANSFER(_gstate.meme_token_contract, _gstate.airdrop_contract, airdrop_asset, "init:" + itr->owner.to_string());
+   meme::airdropmeme::setairdrop_action act2(_gstate.airdrop_contract, {_self, meme_token::xtoken::active_permission});
+   act2.send(itr->owner, extended_asset{airdrop_asset, itr->total_supply.contract});
 }
 
 void applynewmeme::_create_hootswap(const extended_asset& sell_ex_quant, const extended_asset& buy_ex_quant){
@@ -146,5 +148,23 @@ uint64_t applynewmeme::_rand(const name& user, const uint64_t& range) {
     return random_num;
 }
 
+void applynewmeme::closeairdrop(const symbol& symbol){
+   auto itr = _meme_tbl.find(symbol.raw());
+   CHECKC(itr != _meme_tbl.end(), err::RECORD_NOT_FOUND, "meme not found"); 
+   require_auth(itr->owner);
+
+   CHECKC(itr->airdrop_enable, err::PARAM_ERROR, "airdrop not enable");
+
+   _meme_tbl.modify(itr, _self, [&](auto &m) {
+      m.airdrop_enable = false;
+   });
+   
+   //meme.token can transfer 
+   meme_token::xtoken::closeairdrop_action act(_gstate.meme_token_contract, {_self, meme_token::xtoken::active_permission});
+   act.send(symbol);
+   //airdrop close airdrop 
+   meme::airdropmeme::closeairdrop_action act2(_gstate.airdrop_contract, {_self, meme_token::xtoken::active_permission});
+   act2.send(symbol);
+}
 
 } // namespace meme

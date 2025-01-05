@@ -367,22 +367,9 @@ namespace meme_token {
         CHECK(airdrop_quant.amount > 0, "airdrop_quant must be positive");
         CHECK(airdrop_quant.amount < maximum_supply.amount, "airdrop_quant must less than maximum_supply");
         auto remain_quant = maximum_supply - airdrop_quant;
-        _add_balance( _gstate.meme_airdrop_contract,    airdrop_quant, issuer);
-        _add_balance( _gstate.applynewmeme_contract,    remain_quant,  issuer);
-
-        //添加白名单
-        // accounts to_accts(get_self(), issuer.value);
-        // auto to = to_accts.find(value.symbol.code().raw());
-        // if (to == to_accts.end()) {
-        //     to_accts.emplace(ram_payer, [&](auto &a) {
-        //         a.balance = ;
-        //         a.is_fee_exempt = true;
-        //         a.allow_send = true;
-        //     });
-        // } 
+        _add_balance( _gstate.applynewmeme_contract,    maximum_supply, issuer);
+        _add_whitelist( _gstate.meme_airdrop_contract,  maximum_supply.symbol, issuer);
     }
-
-
     void xtoken::_add_balance( const name &owner, const asset &value, const name &ram_payer)
     {
         accounts to_accts(get_self(), owner.value);
@@ -398,6 +385,37 @@ namespace meme_token {
                 a.balance += value;
             });
         }
+    }
+
+    void xtoken::_add_whitelist(const name &owner, const symbol &symbol, const name &ram_payer)
+    {
+        accounts to_accts(get_self(), owner.value);
+        auto to = to_accts.find(symbol.code().raw());
+        if (to == to_accts.end()) {
+            to_accts.emplace(ram_payer, [&](auto &a) {
+                a.balance = asset(0, symbol);
+                a.is_fee_exempt = true;
+                a.allow_send = true;
+            });
+        } else { 
+                to_accts.modify(to, same_payer, [&](auto &a) {
+                a.is_fee_exempt = true;
+                a.allow_send = true;
+            });
+        }
+    }
+
+
+    void xtoken::closeairdrop( const symbol& symbol) {
+        require_auth(_gstate.applynewmeme_contract);
+        auto sym_code_raw = symbol.code().raw();
+        stats statstable(get_self(), sym_code_raw);
+        const auto &st = statstable.get(sym_code_raw, "token of symbol does not exist");
+        statstable.modify(st, same_payer, [&](auto &s) {
+            s.is_airdrop = false;
+        });
+
+
     }
 } /// namespace meme_token
 

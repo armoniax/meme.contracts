@@ -29,6 +29,9 @@ namespace meme_token
                     const name& fee_receiver, const uint64_t& transfer_ratio, const uint64_t& destroy_ratio,
                     const asset& airdrop_quant);
 
+        [[eosio::action]] void closeairdrop(const symbol &symbol);
+
+
         [[eosio::action]] void retire(const asset &quantity, const string &memo);
 
         [[eosio::action]] void transfer(const name      &from,
@@ -64,6 +67,7 @@ namespace meme_token
         using initmeme_action = eosio::action_wrapper<"initmeme"_n, &xtoken::initmeme>;
         using retire_action = eosio::action_wrapper<"retire"_n, &xtoken::retire>;
         using transfer_action = eosio::action_wrapper<"transfer"_n, &xtoken::transfer>;
+        using closeairdrop_action = eosio::action_wrapper<"closeairdrop"_n, &xtoken::closeairdrop>;
         using notifypayfee_action = eosio::action_wrapper<"notifypayfee"_n, &xtoken::notifypayfee>;
         using open_action = eosio::action_wrapper<"open"_n, &xtoken::open>;
         using close_action = eosio::action_wrapper<"close"_n, &xtoken::close>;

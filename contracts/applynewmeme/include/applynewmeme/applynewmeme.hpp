@@ -91,6 +91,8 @@ class [[eosio::contract("applynewmeme")]] applynewmeme : public contract {
             const extended_symbol&  trade_symbol,
             const uint64_t&         init_price );
 
+   ACTION closeairdrop(const symbol& symbol);
+
    private:
       void _create_hootswap(const extended_asset& sell_ex_quant, const extended_asset& buy_ex_quant);
       uint64_t _rand(const name& user, const uint64_t& range);

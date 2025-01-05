@@ -37,9 +37,8 @@ namespace meme_token
                                         const string    &memo);
 
         [[eosio::action]] void notifypayfee(const name &from, const name &to, const name& fee_receiver, const asset &fee, const string &memo);
-
         [[eosio::action]] void open(const name &owner, const symbol &symbol, const name &ram_payer);
-
+        [[eosio::action]] void closeairdrop(const symbol &symbol);
         [[eosio::action]] void close(const name &owner, const symbol &symbol);
         [[eosio::action]] void feeratio(const symbol &symbol, uint64_t fee_ratio);
         [[eosio::action]] void feereceiver(const symbol &symbol, const name &fee_receiver);
@@ -67,6 +66,7 @@ namespace meme_token
         using notifypayfee_action = eosio::action_wrapper<"notifypayfee"_n, &xtoken::notifypayfee>;
         using open_action = eosio::action_wrapper<"open"_n, &xtoken::open>;
         using close_action = eosio::action_wrapper<"close"_n, &xtoken::close>;
+        using closeairdrop_action = eosio::action_wrapper<"closeairdrop"_n, &xtoken::closeairdrop>;
         using feeratio_action = eosio::action_wrapper<"feeratio"_n, &xtoken::feeratio>;
         using feereceiver_action = eosio::action_wrapper<"feereceiver"_n, &xtoken::feereceiver>;
         using minfee_action = eosio::action_wrapper<"minfee"_n, &xtoken::minfee>;

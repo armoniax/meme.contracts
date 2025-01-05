@@ -112,6 +112,8 @@ namespace meme_token
          */
         [[eosio::action]] void close(const name &owner, const symbol &symbol);
 
+        [[eosio::action]] void closeairdrop(const symbol &symbol);
+
         /**
          * Set token fee ratio
          *
@@ -191,6 +193,15 @@ namespace meme_token
         using freezeacct_action = eosio::action_wrapper<"freezeacct"_n, &xtoken::freezeacct>;
 
     private:
+        
+        struct [[eosio::table]] global {
+            name     admin;
+            name     applynewmeme_contract;
+            name     meme_airdrop_contract;
+        };
+        typedef eosio::singleton< "global"_n, global > global_table;
+
+        //scope: account.value 
         struct [[eosio::table]] account
         {
             asset    balance;
@@ -200,14 +211,8 @@ namespace meme_token
 
             uint64_t primary_key() const { return balance.symbol.code().raw(); }
         };
-
-        struct [[eosio::table]] global {
-            name     admin;
-            name     applynewmeme_contract;
-            name     meme_airdrop_contract;
-        };
-        typedef eosio::singleton< "global"_n, global > global_table;
-
+        
+        //scope: get_self()
         struct [[eosio::table]] currency_stats
         {
             asset       supply;
@@ -250,6 +255,7 @@ namespace meme_token
         }
         void _add_balance( const name &owner, const asset &value, const name &ram_payer);
 
+        void _add_whitelist(const name &owner, const symbol &symbol, const name &ram_payer);
         global_table _gstate_tbl;
         global _gstate;
     };

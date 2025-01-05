@@ -39,4 +39,13 @@ void airdropmeme::airdrop(const name& to, const name& bank, const asset& quantit
 
 }
 
+void airdropmeme::closeairdrop(const symbol& symbol){
+   require_auth(_gstate.applynewmeme_contract);
+   auto itr = _airdrop_tbl.find(symbol.raw());
+   CHECKC(itr != _airdrop_tbl.end(), err::RECORD_NOT_FOUND, "airdrop meme not found");
+   
+   _airdrop_tbl.modify(itr, same_payer, [&](auto &m) {
+      m.status = "close"_n;
+   });
+}
 }
