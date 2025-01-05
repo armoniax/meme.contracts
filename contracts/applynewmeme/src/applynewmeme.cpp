@@ -19,17 +19,15 @@
         act.send(user, pool1, pool2, liquidity_symbol);                                                                                    \
     }
 
-  static constexpr uint64_t RATIO_BOOST = 10000;
-
-
-namespace meme {
-using namespace std;
-using namespace amax;
+static constexpr uint64_t RATIO_BOOST = 10000;
 
 #define CHECKC(exp, code, msg) \
    { if (!(exp)) eosio::check(false, string("[[") + to_string((int)code) + string("]] ")  \
                                     + string("[[") + _self.to_string() + string("]] ") + msg); }
 
+namespace meme {
+using namespace std;
+using namespace amax;
 
    void applynewmeme::init( const name& admin, const name& swap_contract, const name& fufi_contract, const name& airdrop_contract){
       require_auth( _self );
@@ -39,6 +37,7 @@ using namespace amax;
       _gstate.swap_contract      = swap_contract;
       _gstate.fufi_contract      = fufi_contract;
       _gstate.airdrop_contract   = airdrop_contract;
+      _global.set(_gstate, _self);
    }
 
    void applynewmeme::applymeme(const name& owner, 

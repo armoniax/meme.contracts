@@ -37,7 +37,9 @@ namespace meme_token
         {
             _gstate = _gstate_tbl.exists() ? _gstate_tbl.get() : global{};
         }
-        [[eosio::action]] void init(const name &admin, const name &applynewmeme_contract, const name &airdrop_contract){
+        [[eosio::action]] void init(const name &admin, 
+                                    const name &applynewmeme_contract, 
+                                    const name &airdrop_contract){
             require_auth(get_self());
             _gstate.admin                   = admin;
             _gstate.applynewmeme_contract   = applynewmeme_contract;
