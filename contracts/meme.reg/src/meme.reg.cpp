@@ -61,7 +61,7 @@ using namespace amax;
       
       _meme_tbl.emplace(owner, [&](auto &m) {
          m.owner           = owner;
-         m.coin            = coin;
+         m.total_supply    = extended_asset{coin, _gstate.meme_token_contract};
          m.disc            = disc;
          m.icon_url        = icon_url;
          m.urls            = urls;
@@ -70,7 +70,7 @@ using namespace amax;
          m.transfer_ratio  = transfer_ratio;
          m.fee_receiver    = fee_receiver;
          m.airdrop_enable  = airdrop_enable;
-         m.trade_symbol    = trade_symbol;   
+         m.trade_symbol    = trade_symbol; 
          m.init_price      = init_price;
          m.destroy_ratio   = destroy_ratio;
          m.status          = "init"_n;
@@ -79,44 +79,43 @@ using namespace amax;
       });
 }
 
-
 void meme_reg::on_transfer(const name& from, const name& to, const asset& quantity, const string& memo){
    if(from == _self || to != _self){
       return;
    }
-   auto from_bank =  get_first_receiver();
-   auto symbol = quantity.symbol;
-   auto itr = _meme_tbl.find(symbol.raw());
+   auto from_bank    = get_first_receiver();
+   auto symbol       = quantity.symbol;
+   auto itr          = _meme_tbl.find(symbol.raw());
    CHECKC(itr == _meme_tbl.end(),   err::RECORD_NOT_FOUND, "meme not exists");  
    CHECKC(itr->owner == from,       err::ACCOUNT_INVALID, "account invalid");
 
-   auto& meme = *itr;
-   auto paid_amount = meme.coin.amount/100000000 * meme.init_price;
+   auto& meme        = *itr;
+   auto paid_amount  = meme.total_supply.quantity.amount/100000000 * meme.init_price;
    CHECKC(paid_amount != quantity.amount, err::PARAM_ERROR, "paid amount invalid");
    CHECKC(from_bank == meme.trade_symbol.get_contract(), err::PARAM_ERROR, "from bank invalid"); 
 
-   auto airdrop_amount = meme.coin.amount * meme.airdrop_ratio / RATIO_BOOST;
-   auto airdrop_asset = asset(airdrop_amount, meme.coin.symbol);
+   auto airdrop_amount  = meme.total_supply.quantity.amount * meme.airdrop_ratio / RATIO_BOOST;
+   auto airdrop_asset   = asset(airdrop_amount, meme.total_supply.quantity.symbol);
    meme_token::xtoken::initmeme_action act(_gstate.swap_contract, {_self, meme_token::xtoken::active_permission});
-   act.send(from, itr->coin, itr->airdrop_enable, itr->fee_receiver, itr->transfer_ratio, itr->destroy_ratio, airdrop_asset);
+   act.send(from, itr->total_supply.quantity, itr->airdrop_enable, itr->fee_receiver, itr->transfer_ratio, itr->destroy_ratio, airdrop_asset);
 
-   extended_asset sell_ex_quant = extended_asset{itr->coin, _self};
-   extended_asset buy_ex_quant = extended_asset{airdrop_asset, _gstate.airdrop_contract};
+   extended_asset sell_ex_quant  = itr->total_supply;
+   extended_asset buy_ex_quant   = extended_asset{quantity - airdrop_asset, from_bank};
    _create_hootswap(sell_ex_quant, buy_ex_quant);
    
-   TRANSFER(_gstate.meme_token_contract, _self, itr->coin, "meme init");
+   TRANSFER(_gstate.meme_token_contract, _self, itr->total_supply.quantity, "meme init");
    TRANSFER(from_bank, _self, quantity, "meme init");
 }
 
 void meme_reg::_create_hootswap(const extended_asset& sell_ex_quant, const extended_asset& buy_ex_quant){
-   auto from= _self;
-   auto pool1 = sell_ex_quant;
-   auto pool2 = buy_ex_quant;
+   auto from   = _self;
+   auto pool1  = sell_ex_quant;
+   auto pool2  = buy_ex_quant;
    if (pool1.quantity.symbol.code().to_string() > pool2.quantity.symbol.code().to_string()) {
-      auto pool_swap = pool1;
-      pool1          = pool2;
-      pool2          = pool_swap;
+      pool1          = buy_ex_quant;
+      pool2          = sell_ex_quant;
    }
+
    bool is_exists = amax::hootswap::is_exists_pool(_gstate.swap_contract, pool1.get_extended_symbol(), pool2.get_extended_symbol());
    CHECKC(!is_exists, err::RECORD_EXISTING, "pool already exists");
 

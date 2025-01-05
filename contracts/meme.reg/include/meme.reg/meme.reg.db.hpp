@@ -59,7 +59,7 @@ typedef eosio::singleton< "global"_n, global_t > global_singleton;
 //scope: _self
 TBL meme_t {
     name                    owner;              //sequence
-    asset                   coin;               //PK
+    extended_asset          total_supply;               //PK
     string                  disc;
     string                  icon_url;           //logo
     string                  urls;    
@@ -68,7 +68,7 @@ TBL meme_t {
     uint64_t                transfer_ratio;     //转账手续费比例
     name                    fee_receiver;       //转账手续费接收账户
     bool                    airdrop_enable;     //是否开启空投
-    extended_symbol         trade_symbol;       //交易对
+    extended_symbol         trade_symbol;       //交易对买symbol
     uint64_t                init_price;        
     name                    status;             //状态  enable disable
     time_point_sec          created_at;
@@ -76,13 +76,12 @@ TBL meme_t {
     meme_t() {}
     meme_t(const name& i): owner(i) {}
 
-    uint64_t primary_key()const { return coin.symbol.code().raw() ; }
+    uint64_t primary_key()const { return total_supply.quantity.symbol.code().raw() ; }
 
     typedef eosio::multi_index< "memes"_n,  meme_t> table;
 
-    EOSLIB_SERIALIZE( meme_t,   (owner)(coin)(disc)(icon_url)
-                                (airdrop_ratio)(transfer_ratio)(fee_receiver)
-                                (airdrop_enable)(trade_symbol)(init_price)(status)(urls)(created_at)(updated_at))
+    EOSLIB_SERIALIZE( meme_t,   (owner)(total_supply)(disc)(icon_url)(urls)(airdrop_ratio)(destroy_ratio)(transfer_ratio)
+                            (fee_receiver)(airdrop_enable)(trade_symbol)(init_price)(status)(created_at)(updated_at))
 };
 
 
