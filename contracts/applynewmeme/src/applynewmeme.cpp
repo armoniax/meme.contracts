@@ -1,4 +1,4 @@
-#include <meme.reg/meme.reg.hpp>
+#include <applynewmeme/applynewmeme.hpp>
 #include <meme.token/meme.token.hpp>
 #include <hoot.swap/hoot.swap.hpp>
 #include <amax.token/amax.token.hpp>
@@ -31,7 +31,7 @@ using namespace amax;
                                     + string("[[") + _self.to_string() + string("]] ") + msg); }
 
 
-   void meme_reg::init( const name& admin, const name& swap_contract, const name& fufi_contract, const name& airdrop_contract){
+   void applynewmeme::init( const name& admin, const name& swap_contract, const name& fufi_contract, const name& airdrop_contract){
       require_auth( _self );
 
       CHECKC( is_account(admin),err::ACCOUNT_INVALID,"admin invalid:" + admin.to_string())
@@ -41,7 +41,7 @@ using namespace amax;
       _gstate.airdrop_contract   = airdrop_contract;
    }
 
-   void meme_reg::applymeme(const name& owner, 
+   void applynewmeme::applymeme(const name& owner, 
                      const asset&      coin,
                      const string&     disc,
                      const string&     icon_url, 
@@ -79,7 +79,7 @@ using namespace amax;
       });
 }
 
-void meme_reg::on_transfer(const name& from, const name& to, const asset& quantity, const string& memo){
+void applynewmeme::on_transfer(const name& from, const name& to, const asset& quantity, const string& memo){
    if(from == _self || to != _self){
       return;
    }
@@ -107,7 +107,7 @@ void meme_reg::on_transfer(const name& from, const name& to, const asset& quanti
    TRANSFER(from_bank, _self, quantity, "meme init");
 }
 
-void meme_reg::_create_hootswap(const extended_asset& sell_ex_quant, const extended_asset& buy_ex_quant){
+void applynewmeme::_create_hootswap(const extended_asset& sell_ex_quant, const extended_asset& buy_ex_quant){
    auto from   = _self;
    auto pool1  = sell_ex_quant;
    auto pool2  = buy_ex_quant;
@@ -137,7 +137,7 @@ void meme_reg::_create_hootswap(const extended_asset& sell_ex_quant, const exten
 
 }
 
-uint64_t meme_reg::_rand(const name& user, const uint64_t& range) {
+uint64_t applynewmeme::_rand(const name& user, const uint64_t& range) {
     auto        mixd      = tapos_block_prefix() * tapos_block_num() + user.value + current_time_point().sec_since_epoch();
     const char* mixedChar = reinterpret_cast<const char*>(&mixd);
     auto        result    = sha256((char*)mixedChar, sizeof(mixedChar));

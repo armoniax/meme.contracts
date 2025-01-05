@@ -2,7 +2,6 @@
 #include <eosio/eosio.hpp>
 
 namespace amax {
-#define TBL struct [[eosio::table, eosio::contract("hoot.swap")]]
 
 
 using std::string;

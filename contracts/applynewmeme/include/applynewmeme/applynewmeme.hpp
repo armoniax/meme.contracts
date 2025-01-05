@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include <meme.reg/meme.reg.db.hpp>
+#include <applynewmeme/applynewmeme.db.hpp>
 #include <wasm_db.hpp>
 
 namespace meme {
@@ -45,22 +45,22 @@ enum class err: uint8_t {
 };
 
 /**
- * The `meme.reg` sample system contract defines the structures and actions that allow users to create, issue, and manage tokens for AMAX based blockchains. It demonstrates one way to implement a smart contract which allows for creation and management of tokens. It is possible for one to create a similar contract which suits different needs. However, it is recommended that if one only needs a token with the below listed actions, that one uses the `meme.reg` contract instead of developing their own.
+ * The `applynewmeme` sample system contract defines the structures and actions that allow users to create, issue, and manage tokens for AMAX based blockchains. It demonstrates one way to implement a smart contract which allows for creation and management of tokens. It is possible for one to create a similar contract which suits different needs. However, it is recommended that if one only needs a token with the below listed actions, that one uses the `applynewmeme` contract instead of developing their own.
  *
- * The `meme.reg` contract class also implements two useful public static methods: `get_supply` and `get_balance`. The first allows one to check the total supply of a specified token, created by an account and the second allows one to check the balance of a token for a specified account (the token creator account has to be specified as well).
+ * The `applynewmeme` contract class also implements two useful public static methods: `get_supply` and `get_balance`. The first allows one to check the total supply of a specified token, created by an account and the second allows one to check the balance of a token for a specified account (the token creator account has to be specified as well).
  *
- * The `meme.reg` contract manages the set of tokens, accounts and their corresponding balances, by using two internal multi-index structures: the `accounts` and `stats`. The `accounts` multi-index table holds, for each row, instances of `account` object and the `account` object holds information about the balance of one token. The `accounts` table is scoped to an eosio account, and it keeps the rows indexed based on the token's symbol.  This means that when one queries the `accounts` multi-index table for an account name the result is all the tokens that account holds at the moment.
+ * The `applynewmeme` contract manages the set of tokens, accounts and their corresponding balances, by using two internal multi-index structures: the `accounts` and `stats`. The `accounts` multi-index table holds, for each row, instances of `account` object and the `account` object holds information about the balance of one token. The `accounts` table is scoped to an eosio account, and it keeps the rows indexed based on the token's symbol.  This means that when one queries the `accounts` multi-index table for an account name the result is all the tokens that account holds at the moment.
  *
  * Similarly, the `stats` multi-index table, holds instances of `currency_stats` objects for each row, which contains information about current supply, maximum supply, and the creator account for a symbol token. The `stats` table is scoped to the token symbol.  Therefore, when one queries the `stats` table for a token symbol the result is one single entry/row corresponding to the queried symbol token if it was previously created, or nothing, otherwise.
  */
-class [[eosio::contract("meme.reg")]] meme_reg : public contract {
+class [[eosio::contract("applynewmeme")]] applynewmeme : public contract {
    
    private:
       dbc                 _dbc;
    public:
       using contract::contract;
   
-   meme_reg(eosio::name receiver, eosio::name code, datastream<const char*> ds): contract(receiver, code, ds),
+   applynewmeme(eosio::name receiver, eosio::name code, datastream<const char*> ds): contract(receiver, code, ds),
          _dbc(get_self()),
          _global(get_self(), get_self().value),
          _meme_tbl(get_self(), get_self().value)
@@ -69,7 +69,7 @@ class [[eosio::contract("meme.reg")]] meme_reg : public contract {
         
     }
 
-    ~meme_reg() { _global.set( _gstate, get_self() ); }
+    ~applynewmeme() { _global.set( _gstate, get_self() ); }
 
 
    ACTION init( const name& admin, const name& swap_contract, const name& fufi_contract, const name& airdrop_contract);

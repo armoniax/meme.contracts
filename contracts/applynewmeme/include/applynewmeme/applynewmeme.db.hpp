@@ -25,8 +25,8 @@ using namespace eosio;
 static constexpr uint32_t MAX_LOGO_SIZE        = 512;
 static constexpr uint32_t MAX_TITLE_SIZE        = 2048;
 
-#define TBL struct [[eosio::table, eosio::contract("meme.reg")]]
-#define NTBL(name) struct [[eosio::table(name), eosio::contract("meme.reg")]]
+#define TBL struct [[eosio::table, eosio::contract("applynewmeme")]]
+#define NTBL(name) struct [[eosio::table(name), eosio::contract("applynewmeme")]]
 
 namespace ProducerStatus {
     static constexpr eosio::name DISABLE     { "disable"_n   };
