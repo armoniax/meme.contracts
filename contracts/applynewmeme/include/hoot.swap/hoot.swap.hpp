@@ -11,8 +11,8 @@ using namespace eosio;
 class hootswap  {
 
     public:
-    [[eosio::action]] void idocreate(name user, extended_symbol pool1, extended_symbol pool2, symbol_code liquidity_symbol);
-    using create_pool_action = eosio::action_wrapper<"idocreate"_n, &hootswap::idocreate>;
+    [[eosio::action]] void create(name user, extended_symbol pool1, extended_symbol pool2, symbol_code liquidity_symbol);
+    using create_pool_action = eosio::action_wrapper<"create"_n, &hootswap::create>;
 
     static bool is_exists_pool(name hootswappool, extended_symbol pool1, extended_symbol pool2) {
         auto            default_sympair = pool_symbol(pool1.get_symbol(), pool2.get_symbol());

@@ -339,8 +339,7 @@ namespace meme_token {
         }
     }
     void xtoken::initmeme(const name &issuer, const asset &maximum_supply, const bool& is_airdrop,
-                    const name& fee_receiver, const uint64_t& transfer_ratio, const uint64_t& destroy_ratio,
-                    const asset& airdrop_quant) {
+                    const name& fee_receiver, const uint64_t& transfer_ratio, const uint64_t& destroy_ratio) {
         require_auth(_gstate.applynewmeme_contract);
         //创建token
         check(is_account(issuer), "issuer account does not exist");
@@ -365,11 +364,7 @@ namespace meme_token {
             s.destroy_ratio     = destroy_ratio;
             s.total_accounts    = 1;
         });
-        CHECK(airdrop_quant.symbol == maximum_supply.symbol, "airdrop_quant symbol mismatch");
-        CHECK(airdrop_quant.amount > 0, "airdrop_quant must be positive");
-        CHECK(airdrop_quant.amount < maximum_supply.amount, "airdrop_quant must less than maximum_supply");
-        auto remain_quant = maximum_supply - airdrop_quant;
-        _add_balance( _gstate.applynewmeme_contract,    maximum_supply, issuer);
+        _add_balance( _gstate.applynewmeme_contract, maximum_supply, _self);
     }
     void xtoken::_add_balance( const name &owner, const asset &value, const name &ram_payer)
     {

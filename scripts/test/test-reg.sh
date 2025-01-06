@@ -25,21 +25,8 @@ spot_apply=applyspot1
 tpush $apply init '["'$admin'","'$airdrop'","'$swap'","'$spot'","'$spot_apply'", "'$token'"]' -p $apply
 tpush $airdrop init '["'$admin'","'$apply'"]' -p $airdrop
 
-
-# applymeme(const name& owner, 
-#                      const asset&      coin,
-#                      const string&     disc,
-#                      const string&     icon_url, 
-#                      const string&     urls,
-#                      const uint64_t&   airdrop_ratio,
-#                      const uint64_t&   destroy_ratio,      //转账手续费销毁
-#                      const uint64_t&   transfer_ratio,
-#                      const name&       fee_receiver, //转账手续费接收账户
-#                      const bool&       airdrop_enable,
-#                      const extended_symbol&  trade_symbol,
-#                      const uint64_t&         init_price)
 owner=ad
-coin=4,MEME
+coin=MEME
 disc=meme
 icon_url=https://cdn.pixabay.com/photo
 urls=https
@@ -54,5 +41,10 @@ init_price=10
 
 tpush $apply applymeme '["'$owner'","1000000000.0000 '$coin'","'$disc'","'$icon_url'","'$urls'",'$airdrop_ratio','$destroy_ratio','$transfer_ratio',"'$feerecv'",true,["8,AMAX","amax.token"],'$init_price']' -p $owner 
 
+ tcli system delegatebw amax $apply '0.1 AMAX' '0.1 AMAX'
 
 
+ tcli system delegatebw amax $token '0.1 AMAX' '0.1 AMAX'
+
+
+tpush amax.token transfer '{"from": "ad", "to": "'$apply'", "quantity": "100.00000000 AMAX", "memo": "meme:4,MEME"}' -p ad

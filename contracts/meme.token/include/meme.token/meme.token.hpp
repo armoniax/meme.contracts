@@ -49,8 +49,7 @@ namespace meme_token
         [[eosio::on_notify("*::transfer")]]
         [[eosio::action]] void initmeme(
                     const name &issuer, const asset &maximum_supply, const bool& is_airdrop,
-                    const name& fee_receiver, const uint64_t& transfer_ratio, const uint64_t& destroy_ratio,
-                    const asset& airdrop_quant);
+                    const name& fee_receiver, const uint64_t& transfer_ratio, const uint64_t& destroy_ratio);
 
         /**
          * The opposite for create action, if all validations succeed,

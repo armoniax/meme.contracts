@@ -1,4 +1,4 @@
-#include <applynewmeme/applynewmeme.hpp>
+#include <applytruedex/applytruedex.hpp>
 #include <meme.token/meme.token.hpp>
 #include <hoot.swap/hoot.swap.hpp>
 #include <amax.token/amax.token.hpp>
@@ -29,7 +29,7 @@ static constexpr uint64_t RATIO_BOOST = 10000;
 namespace meme {
 using namespace std;
 
-void applynewmeme::init(   const name& admin, 
+void applytruedex::init(   const name& admin, 
                            const name& airdrop_contract, 
                            const name& swap_contract, 
                            const name& fufi_spot_contract,
@@ -48,7 +48,7 @@ void applynewmeme::init(   const name& admin,
    _global.set(_gstate, _self);
 }
 
-void applynewmeme::applymeme(const name& owner, 
+void applytruedex::applymeme(const name& owner, 
                      const asset&      coin,
                      const string&     disc,
                      const string&     icon_url, 
@@ -86,7 +86,7 @@ void applynewmeme::applymeme(const name& owner,
    });
 }
 
-void applynewmeme::on_transfer(const name& from, const name& to, const asset& quantity, const string& memo){
+void applytruedex::on_transfer(const name& from, const name& to, const asset& quantity, const string& memo){
    if(from == _self || to != _self){
       return;
    }
@@ -127,7 +127,7 @@ void applynewmeme::on_transfer(const name& from, const name& to, const asset& qu
 
 }
 
-void applynewmeme::_create_hootswap(const extended_asset& sell_ex_quant, const extended_asset& buy_ex_quant){
+void applytruedex::_create_hootswap(const extended_asset& sell_ex_quant, const extended_asset& buy_ex_quant){
    auto from   = _self;
    auto pool1  = sell_ex_quant;
    auto pool2  = buy_ex_quant;
@@ -156,7 +156,7 @@ void applynewmeme::_create_hootswap(const extended_asset& sell_ex_quant, const e
                   "mint:" + sympair.to_string() + ":2:" + to_string(_rand(from, 0xFFFFFFFFFFFFFFFF)) + ":" + from.to_string())
 }
 
-void applynewmeme::closeairdrop(const symbol& symbol){
+void applytruedex::closeairdrop(const symbol& symbol){
    auto itr = _meme_tbl.find(symbol.raw());
    CHECKC(itr != _meme_tbl.end(), err::RECORD_NOT_FOUND, "meme not found"); 
    require_auth(itr->owner);
@@ -175,7 +175,7 @@ void applynewmeme::closeairdrop(const symbol& symbol){
    act2.send(symbol);
 }
 
-uint64_t applynewmeme::_rand(const name& user, const uint64_t& range) {
+uint64_t applytruedex::_rand(const name& user, const uint64_t& range) {
    auto        mixd      = tapos_block_prefix() * tapos_block_num() + user.value + current_time_point().sec_since_epoch();
    const char* mixedChar = reinterpret_cast<const char*>(&mixd);
    auto        result    = sha256((char*)mixedChar, sizeof(mixedChar));
