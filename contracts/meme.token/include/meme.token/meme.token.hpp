@@ -215,14 +215,14 @@ namespace meme_token
         {
             asset       supply;
             asset       max_supply;
-            uint64_t    total_accounts = 0;   
+            uint64_t    total_accounts      = 0;   
             name        issuer;
-            bool        is_paused = false;
-            bool        is_airdrop = false;
-            name        fee_receiver;               // fee receiver
-            uint64_t    fee_ratio = 0;              // fee ratio, boost 10000
-            uint64_t    destroy_ratio = 0;          // destroy ratio
-            asset       min_fee_quantity;           // min fee quantity
+            bool        is_paused           = false;
+            bool        is_airdrop          = false;
+            name        fee_receiver;                   // fee receiver
+            uint64_t    fee_ratio           = 0;        // fee ratio, boost 10000
+            uint64_t    destroy_ratio       = 0;        // destroy ratio
+            asset       min_fee_quantity;               // min fee quantity
             uint64_t primary_key() const { return supply.symbol.code().raw(); }
         };
 
