@@ -76,7 +76,7 @@ namespace meme_token {
         auto from_acct = from_accts.find(sym_code_raw);
         if(st.is_airdrop) {
             if(from_acct != from_accts.end()) {
-                CHECK(from_acct->allow_send, "from account is not allow send");
+                CHECK(from_acct->airdrop_allow_send, "from account is not allow send");
             }
         }
 
@@ -314,26 +314,28 @@ namespace meme_token {
     }
 
 
-    void xtoken::setacctperms(const name& issuer, const name& to, const symbol& symbol,  
-                    const bool& is_fee_exempt, const bool& allowsend) {
-        require_auth( _gstate.admin);
-        require_issuer(issuer, symbol);
+    void xtoken::setacctperms(std::vector<name>& acccouts, const symbol& symbol,  
+                    const bool& is_fee_exempt, const bool& airdrop_allowsend) {
+        check(has_auth( _gstate.admin) || has_auth( _gstate.applynewmeme_contract), "only admin or applynewmeme_contract can setacctperms");
+        check(acccouts.size() > 0, "acccouts is empty");
 
-        check( is_account( to ), "to account does not exist: " + to.to_string() );
-
-        accounts acnts( get_self(), to.value );
-        auto it = acnts.find( symbol.code().raw() );
-        if( it == acnts.end() ) {
-            acnts.emplace( issuer, [&]( auto& a ){
-                a.balance           = asset(0, symbol);
-                a.is_fee_exempt     = is_fee_exempt;
-                a.allow_send        = allowsend;
-            });
-        } else {
-            acnts.modify( it, issuer, [&]( auto& a ) {
-                a.is_fee_exempt     = is_fee_exempt;
-                a.allow_send        = allowsend;
-            });
+        for(auto& account : acccouts) {
+            check( is_account( account ), "account does not exist: " + account.to_string() );
+        
+            accounts acnts( get_self(), account.value );
+            auto itr = acnts.find( symbol.code().raw() );
+            if( itr == acnts.end() ) {
+                acnts.emplace( _self, [&]( auto& a ){
+                    a.balance                   = asset(0, symbol);
+                    a.is_fee_exempt             = is_fee_exempt;
+                    a.airdrop_allow_send        = airdrop_allowsend;
+                });
+            } else {
+                acnts.modify( itr, _self, [&]( auto& a ) {
+                    a.is_fee_exempt             = is_fee_exempt;
+                    a.airdrop_allow_send        = airdrop_allowsend;
+                });
+            }
         }
     }
     void xtoken::initmeme(const name &issuer, const asset &maximum_supply, const bool& is_airdrop,
@@ -378,7 +380,7 @@ namespace meme_token {
             to_accts.emplace(ram_payer, [&](auto &a) {
                 a.balance = value;
                 a.is_fee_exempt = true;
-                a.allow_send = true;
+                a.airdrop_allow_send = true;
             });
         } else { 
                 to_accts.modify(to, same_payer, [&](auto &a) {
@@ -395,12 +397,12 @@ namespace meme_token {
             to_accts.emplace(ram_payer, [&](auto &a) {
                 a.balance = asset(0, symbol);
                 a.is_fee_exempt = true;
-                a.allow_send = true;
+                a.airdrop_allow_send = true;
             });
         } else { 
                 to_accts.modify(to, same_payer, [&](auto &a) {
                 a.is_fee_exempt = true;
-                a.allow_send = true;
+                a.airdrop_allow_send = true;
             });
         }
     }

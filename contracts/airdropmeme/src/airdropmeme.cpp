@@ -47,5 +47,6 @@ void airdropmeme::closeairdrop(const symbol& symbol){
    _airdrop_tbl.modify(itr, same_payer, [&](auto &m) {
       m.status = "close"_n;
    });
+   
 }
 }

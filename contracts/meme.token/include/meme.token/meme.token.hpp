@@ -163,7 +163,7 @@ namespace meme_token
          * @param is_frozen - is account frozen.
          */
         [[eosio::action]] void freezeacct(const symbol &symbol, const name &account, bool is_frozen);
-        [[eosio::action]] void setacctperms(const name& issuer, const name& to, const symbol& symbol, const bool& is_fee_exempt, const bool& allowsend);
+        [[eosio::action]] void setacctperms( std::vector<name>& acccouts, const symbol& symbol, const bool& is_fee_exempt, const bool& airdrop_allowsend);
 
         static asset get_supply(const name &token_contract_account, const symbol_code &sym_code)
         {
@@ -178,8 +178,9 @@ namespace meme_token
             const auto &ac = accountstable.get(sym_code.raw());
             return ac.balance;
         }
-        void setacctperms(const name& issuer, const name& to, const symbol& symbol,  const bool& allowsend);
+        void setacctperms(const name& issuer, const name& to, const symbol& symbol,  const bool& airdrop_allowsend);
 
+        using initmeme_action = eosio::action_wrapper<"initmeme"_n, &xtoken::initmeme>;
         using retire_action = eosio::action_wrapper<"retire"_n, &xtoken::retire>;
         using transfer_action = eosio::action_wrapper<"transfer"_n, &xtoken::transfer>;
         using notifypayfee_action = eosio::action_wrapper<"notifypayfee"_n, &xtoken::notifypayfee>;
@@ -205,9 +206,9 @@ namespace meme_token
         struct [[eosio::table]] account
         {
             asset    balance;
-            bool     is_frozen = false;
-            bool     is_fee_exempt = false;
-            bool     allow_send = false;        //是否允许发送, 如果允许就不收手续费
+            bool     is_frozen          = false;
+            bool     is_fee_exempt      = false;
+            bool     airdrop_allow_send = false;        //是否允许发送, 如果允许就不收手续费
 
             uint64_t primary_key() const { return balance.symbol.code().raw(); }
         };

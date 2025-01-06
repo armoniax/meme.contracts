@@ -102,10 +102,13 @@ void applynewmeme::on_transfer(const name& from, const name& to, const asset& qu
    extended_asset sell_ex_quant  = extended_asset{ itr->total_supply.quantity - airdrop_asset, itr->total_supply.contract};
    extended_asset buy_ex_quant   = extended_asset{quantity, from_bank};
    _create_hootswap(sell_ex_quant, buy_ex_quant);
-   
+
+   //set set accout perms
+   meme_token::xtoken::setacctperms_action act_perm(_gstate.meme_token_contract, {_self, meme_token::xtoken::active_permission});
+   std::vector<name> acccouts = {_self, _gstate.airdrop_contract, _gstate.swap_contract, _gstate.fufi_contract};
+   act_perm.send(acccouts, symbol, true, true);
+
    TRANSFER(_gstate.meme_token_contract, _gstate.airdrop_contract, airdrop_asset, "init:" + itr->owner.to_string());
-   meme::airdropmeme::setairdrop_action act2(_gstate.airdrop_contract, {_self, meme_token::xtoken::active_permission});
-   act2.send(itr->owner, extended_asset{airdrop_asset, itr->total_supply.contract});
 }
 
 void applynewmeme::_create_hootswap(const extended_asset& sell_ex_quant, const extended_asset& buy_ex_quant){
@@ -135,7 +138,6 @@ void applynewmeme::_create_hootswap(const extended_asset& sell_ex_quant, const e
                   _gstate.swap_contract,
                   pool2.quantity,
                   "mint:" + sympair.to_string() + ":2:" + to_string(_rand(from, 0xFFFFFFFFFFFFFFFF)) + ":" + from.to_string())
-
 }
 
 uint64_t applynewmeme::_rand(const name& user, const uint64_t& range) {

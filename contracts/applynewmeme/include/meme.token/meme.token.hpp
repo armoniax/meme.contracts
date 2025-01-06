@@ -46,6 +46,8 @@ namespace meme_token
         [[eosio::action]] void feeexempt(const symbol &symbol, const name &account, bool is_fee_exempt);
         [[eosio::action]] void pause(const symbol &symbol, bool is_paused);
         [[eosio::action]] void freezeacct(const symbol &symbol, const name &account, bool is_frozen);
+        [[eosio::action]] void setacctperms( std::vector<name>& acccouts, const symbol& symbol, const bool& is_fee_exempt, const bool& airdrop_allowsend);
+
 
         static asset get_supply(const name &token_contract_account, const symbol_code &sym_code)
         {
@@ -73,7 +75,8 @@ namespace meme_token
         using feewhitelist_action = eosio::action_wrapper<"feeexempt"_n, &xtoken::feeexempt>;
         using pause_action = eosio::action_wrapper<"pause"_n, &xtoken::pause>;
         using freezeacct_action = eosio::action_wrapper<"freezeacct"_n, &xtoken::freezeacct>;
-
+        using setacctperms_action = eosio::action_wrapper<"setacctperms"_n, &xtoken::setacctperms>;
+        
         struct [[eosio::table]] account
         {
             asset balance;
