@@ -46,12 +46,13 @@ typedef std::variant<eosio::public_key, string> recover_target_type;
 
 NTBL("global") global_t {
     name                     admin;   
-    name                     airdrop_contract;
-    name                     swap_contract;
-    name                     fufi_contract;
-    name                     meme_token_contract;
+    name                     airdrop_contract;      //空投合约
+    name                     swap_contract;         //hootswap合约
+    name                     fufi_contract;         //fufi合约
+    name                     fufi_apply_contract;   //fufi申请合约
+    name                     meme_token_contract;   //meme token合约
 
-    EOSLIB_SERIALIZE( global_t, (admin)(airdrop_contract)(swap_contract)(fufi_contract)(meme_token_contract))
+    EOSLIB_SERIALIZE( global_t, (admin)(airdrop_contract)(swap_contract)(fufi_contract)(fufi_apply_contract)(meme_token_contract))
 };
 
 typedef eosio::singleton< "global"_n, global_t > global_singleton;

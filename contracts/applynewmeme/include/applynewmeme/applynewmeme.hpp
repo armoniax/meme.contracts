@@ -72,7 +72,12 @@ class [[eosio::contract("applynewmeme")]] applynewmeme : public contract {
     ~applynewmeme() { _global.set( _gstate, get_self() ); }
 
 
-   ACTION init( const name& admin, const name& swap_contract, const name& fufi_contract, const name& airdrop_contract);
+   ACTION init(const name& admin, 
+               const name& airdrop_contract, 
+               const name& swap_contract, 
+               const name& fufi_contract,
+               const name& fufi_apply_contract, 
+               const name& meme_token_contract);
 
    [[eosio::on_notify("*::transfer")]]
    void on_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
