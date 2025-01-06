@@ -38,12 +38,11 @@ namespace meme_token
             _gstate = _gstate_tbl.exists() ? _gstate_tbl.get() : global{};
         }
         [[eosio::action]] void init(const name &admin, 
-                                    const name &applynewmeme_contract, 
-                                    const name &airdrop_contract){
+                                    const name &applynewmeme_contract){
             require_auth(get_self());
             _gstate.admin                   = admin;
             _gstate.applynewmeme_contract   = applynewmeme_contract;
-            _gstate.meme_airdrop_contract   = airdrop_contract;
+            
             _gstate_tbl.set(_gstate, get_self());
         }
 
@@ -198,7 +197,6 @@ namespace meme_token
         struct [[eosio::table]] global {
             name     admin;
             name     applynewmeme_contract;
-            name     meme_airdrop_contract;
         };
         typedef eosio::singleton< "global"_n, global > global_table;
 

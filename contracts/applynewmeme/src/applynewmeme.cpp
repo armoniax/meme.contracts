@@ -32,8 +32,8 @@ using namespace std;
 void applynewmeme::init(   const name& admin, 
                            const name& airdrop_contract, 
                            const name& swap_contract, 
-                           const name& fufi_contract,
-                           const name& fufi_apply_contract, 
+                           const name& fufi_spot_contract,
+                           const name& fufi_spot_contract, 
                            const name& meme_token_contract){
    require_auth( _self );
 

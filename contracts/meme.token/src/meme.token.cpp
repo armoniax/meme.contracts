@@ -370,7 +370,6 @@ namespace meme_token {
         CHECK(airdrop_quant.amount < maximum_supply.amount, "airdrop_quant must less than maximum_supply");
         auto remain_quant = maximum_supply - airdrop_quant;
         _add_balance( _gstate.applynewmeme_contract,    maximum_supply, issuer);
-        _add_whitelist( _gstate.meme_airdrop_contract,  maximum_supply.symbol, issuer);
     }
     void xtoken::_add_balance( const name &owner, const asset &value, const name &ram_payer)
     {
