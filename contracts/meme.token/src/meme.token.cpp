@@ -61,7 +61,6 @@ namespace meme_token {
         stats statstable(get_self(), sym_code_raw);
         const auto &st = statstable.get(sym_code_raw, "token of symbol does not exist");
         check(st.supply.symbol == quantity.symbol, "symbol precision mismatch");
-        check(!st.is_paused, "token is paused");
 
         require_recipient(from);
         require_recipient(to);
@@ -71,22 +70,22 @@ namespace meme_token {
         check(quantity.symbol == st.supply.symbol, "symbol precision mismatch");
         check(memo.size() <= 256, "memo has more than 256 bytes");
 
-        CHECK(quantity > st.min_fee_quantity, "quantity must larger than min fee:" + st.min_fee_quantity.to_string());
+        CHECK(quantity > st.min_fee_quant, "quantity must larger than min fee:" + st.min_fee_quant.to_string());
         accounts from_accts(get_self(), from.value);
         auto from_acct = from_accts.find(sym_code_raw);
-        if(st.is_airdrop) {
+        if(st.airdrop_mode) {
             if(from_acct != from_accts.end()) {
-                CHECK(from_acct->airdrop_allow_send, "from account is not allow send");
+                CHECK(from_acct->airdropmode_allow_send, "from account is not allow send");
             }
         }
 
         bool fee_exempt = true;
         if(from_acct != from_accts.end()) {
-            fee_exempt = from_acct->is_fee_exempt; 
+            fee_exempt = from_acct->is_fee_exempted; 
         }
         accounts to_accts(get_self(), to.value);
         auto to_acct = to_accts.find(sym_code_raw);
-        fee_exempt = fee_exempt | ( to_acct == to_accts.end() || !to_acct->is_fee_exempt);
+        fee_exempt = fee_exempt | ( to_acct == to_accts.end() || !to_acct->is_fee_exempted);
     
         asset actual_recv = quantity;
         asset fee = asset(0, quantity.symbol);
@@ -96,7 +95,7 @@ namespace meme_token {
             &&  to != st.fee_receiver )
         {
             if(!fee_exempt) {
-                fee.amount = std::max( st.min_fee_quantity.amount,
+                fee.amount = std::max( st.min_fee_quant.amount,
                                 (int64_t)multiply_decimal64(quantity.amount, st.fee_ratio, RATIO_BOOST) );
                 CHECK(fee < quantity, "the calculated fee must less than quantity");
                 actual_recv -= fee;
@@ -116,8 +115,8 @@ namespace meme_token {
         if (fee.amount > 0) {
             //split fee
             asset destroy_fee = asset(0, fee.symbol);
-            if(st.destroy_ratio > 0) {
-                destroy_fee.amount = multiply_decimal64(fee.amount, st.destroy_ratio, RATIO_BOOST);
+            if(st.fee_burn_ratio > 0) {
+                destroy_fee.amount = multiply_decimal64(fee.amount, st.fee_burn_ratio, RATIO_BOOST);
                 if(destroy_fee.amount > 0) {
                     add_balance(st, "oooo"_n, destroy_fee, payer);
                 }
@@ -157,12 +156,7 @@ namespace meme_token {
     {
         accounts from_accts(get_self(), owner.value);
         const auto &from = from_accts.get(value.symbol.code().raw(), "no balance object found");
-        if (is_check_frozen) {
-            check(!is_account_frozen(st, owner, from), "from account is frozen");
-        }
         check(from.balance.amount >= value.amount, "overdrawn balance");
-
-      
         from_accts.modify(from, owner, [&](auto &a) {
             a.balance -= value;
         });
@@ -187,9 +181,6 @@ namespace meme_token {
         }
         else
         {
-            if (is_check_frozen) {
-                check(!is_account_frozen(st, owner, *to), "to account is frozen");
-            }
             if (to->balance.amount == 0) {
                 ret = true;
             }
@@ -210,7 +201,6 @@ namespace meme_token {
         stats statstable(get_self(), sym_code_raw);
         const auto &st = statstable.get(sym_code_raw, "token of symbol does not exist");
         check(st.supply.symbol == symbol, "symbol precision mismatch");
-        check(!st.is_paused, "token is paused");
 
         open_account(owner, symbol, ram_payer);
     }
@@ -235,12 +225,10 @@ namespace meme_token {
         stats statstable(get_self(), sym_code_raw);
         const auto &st = statstable.get(sym_code_raw, "token of symbol does not exist");
         check(st.supply.symbol == symbol, "symbol precision mismatch");
-        check(!st.is_paused, "token is paused");
 
         accounts accts(get_self(), owner.value);
         auto it = accts.find(sym_code_raw);
         check(it != accts.end(), "Balance row already deleted or never existed. Action won't have any effect.");
-        check(!is_account_frozen(st, owner, *it), "account is frozen");
         check(it->balance.amount == 0, "Cannot close because the balance is not zero.");
         accts.erase(it);
     }
@@ -257,13 +245,13 @@ namespace meme_token {
         open_account(fee_receiver, symbol, st_out.issuer);
     }
 
-    void xtoken::minfee(const symbol &symbol, const asset &min_fee_quantity) {
-        check(min_fee_quantity.symbol == symbol, "symbol of min_fee_quantity  mismatch");
-        check(min_fee_quantity.amount > 0, "amount of min_fee_quantity can not be negative");
-        update_currency_field(symbol, min_fee_quantity, &currency_stats::min_fee_quantity);
+    void xtoken::minfee(const symbol &symbol, const asset &min_fee_quant) {
+        check(min_fee_quant.symbol == symbol, "symbol of min_fee_quant  mismatch");
+        check(min_fee_quant.amount > 0, "amount of min_fee_quant can not be negative");
+        update_currency_field(symbol, min_fee_quant, &currency_stats::min_fee_quant);
     }
 
-    void xtoken::feeexempt(const symbol &symbol, const name &account, bool is_fee_exempt) {
+    void xtoken::feeexempt(const symbol &symbol, const name &account, bool is_fee_exempted) {
         auto sym_code_raw = symbol.code().raw();
         stats statstable(get_self(), sym_code_raw);
         const auto &st = statstable.get(sym_code_raw, "token of symbol does not exist");
@@ -274,27 +262,7 @@ namespace meme_token {
         const auto &acct = accts.get(sym_code_raw, "account of token does not exist");
 
         accts.modify(acct, st.issuer, [&](auto &a) {
-             a.is_fee_exempt = is_fee_exempt;
-        });
-    }
-
-    void xtoken::pause(const symbol &symbol, bool is_paused)
-    {
-        update_currency_field(symbol, is_paused, &currency_stats::is_paused);
-    }
-
-    void xtoken::freezeacct(const symbol &symbol, const name &account, bool is_frozen) {
-        auto sym_code_raw = symbol.code().raw();
-        stats statstable(get_self(), sym_code_raw);
-        const auto &st = statstable.get(sym_code_raw, "token of symbol does not exist");
-        check(st.supply.symbol == symbol, "symbol precision mismatch");
-        require_auth(st.issuer);
-
-        accounts accts(get_self(), account.value);
-        const auto &acct = accts.get(sym_code_raw, "account of token does not exist");
-
-        accts.modify(acct, st.issuer, [&](auto &a) {
-             a.is_frozen = is_frozen;
+             a.is_fee_exempted = is_fee_exempted;
         });
     }
 
@@ -315,7 +283,7 @@ namespace meme_token {
 
 
     void xtoken::setacctperms(std::vector<name>& acccouts, const symbol& symbol,  
-                    const bool& is_fee_exempt, const bool& airdrop_allowsend) {
+                    const bool& is_fee_exempted, const bool& airdrop_allowsend) {
         check(has_auth( _gstate.admin) || has_auth( _gstate.applynewmeme_contract), "only admin or applynewmeme_contract can setacctperms");
         check(acccouts.size() > 0, "acccouts is empty");
 
@@ -327,19 +295,19 @@ namespace meme_token {
             if( itr == acnts.end() ) {
                 acnts.emplace( _self, [&]( auto& a ){
                     a.balance                   = asset(0, symbol);
-                    a.is_fee_exempt             = is_fee_exempt;
-                    a.airdrop_allow_send        = airdrop_allowsend;
+                    a.is_fee_exempted             = is_fee_exempted;
+                    a.airdropmode_allow_send        = airdrop_allowsend;
                 });
             } else {
                 acnts.modify( itr, _self, [&]( auto& a ) {
-                    a.is_fee_exempt             = is_fee_exempt;
-                    a.airdrop_allow_send        = airdrop_allowsend;
+                    a.is_fee_exempted             = is_fee_exempted;
+                    a.airdropmode_allow_send        = airdrop_allowsend;
                 });
             }
         }
     }
-    void xtoken::initmeme(const name &issuer, const asset &maximum_supply, const bool& is_airdrop,
-                    const name& fee_receiver, const uint64_t& transfer_ratio, const uint64_t& destroy_ratio) {
+    void xtoken::creatememe(const name &issuer, const asset &maximum_supply, const bool& airdrop_mode,
+                    const name& fee_receiver, const uint64_t& transfer_ratio, const uint64_t& fee_burn_ratio) {
         require_auth(_gstate.applynewmeme_contract);
         //创建token
         check(is_account(issuer), "issuer account does not exist");
@@ -351,17 +319,17 @@ namespace meme_token {
 
         stats statstable(get_self(), sym_code_raw);
         auto existing = statstable.find(sym_code_raw);
-        check(existing == statstable.end(), "token with symbol already exists");
+        check(existing == statstable.end(), "token with symbol already exists:" + sym.code().to_string());
 
         statstable.emplace(get_self(), [&](auto &s) {
             s.supply            = maximum_supply;
             s.max_supply        = maximum_supply;
             s.issuer            = issuer;
-            s.min_fee_quantity  = asset(0, maximum_supply.symbol);
-            s.is_airdrop        = is_airdrop;
+            s.min_fee_quant  = asset(0, maximum_supply.symbol);
+            s.airdrop_mode        = airdrop_mode;
             s.fee_receiver      = fee_receiver;
             s.fee_ratio         = transfer_ratio;
-            s.destroy_ratio     = destroy_ratio;
+            s.fee_burn_ratio     = fee_burn_ratio;
             s.total_accounts    = 1;
         });
         _add_balance( _gstate.applynewmeme_contract, maximum_supply, _self);
@@ -373,8 +341,8 @@ namespace meme_token {
         if (to == to_accts.end()) {
             to_accts.emplace(ram_payer, [&](auto &a) {
                 a.balance = value;
-                a.is_fee_exempt = true;
-                a.airdrop_allow_send = true;
+                a.is_fee_exempted = true;
+                a.airdropmode_allow_send = true;
             });
         } else { 
                 to_accts.modify(to, same_payer, [&](auto &a) {
@@ -390,13 +358,13 @@ namespace meme_token {
         if (to == to_accts.end()) {
             to_accts.emplace(ram_payer, [&](auto &a) {
                 a.balance = asset(0, symbol);
-                a.is_fee_exempt = true;
-                a.airdrop_allow_send = true;
+                a.is_fee_exempted = true;
+                a.airdropmode_allow_send = true;
             });
         } else { 
                 to_accts.modify(to, same_payer, [&](auto &a) {
-                a.is_fee_exempt = true;
-                a.airdrop_allow_send = true;
+                a.is_fee_exempted = true;
+                a.airdropmode_allow_send = true;
             });
         }
     }
@@ -408,7 +376,7 @@ namespace meme_token {
         stats statstable(get_self(), sym_code_raw);
         const auto &st = statstable.get(sym_code_raw, "token of symbol does not exist");
         statstable.modify(st, same_payer, [&](auto &s) {
-            s.is_airdrop = false;
+            s.airdrop_mode = false;
         });
 
 

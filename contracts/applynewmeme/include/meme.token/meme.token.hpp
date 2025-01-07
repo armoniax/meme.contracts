@@ -24,9 +24,9 @@ namespace meme_token
          static constexpr eosio::name active_permission{"active"_n};
 
 
-        [[eosio::action]] void initmeme(
-                    const name &issuer, const asset &maximum_supply, const bool& is_airdrop,
-                    const name& fee_receiver, const uint64_t& transfer_ratio, const uint64_t& destroy_ratio);
+        [[eosio::action]] void creatememe(
+                    const name &issuer, const asset &maximum_supply, const bool& airdrop_mode,
+                    const name& fee_receiver, const uint64_t& transfer_ratio, const uint64_t& fee_burn_ratio);
 
         [[eosio::action]] void retire(const asset &quantity, const string &memo);
 
@@ -41,27 +41,16 @@ namespace meme_token
         [[eosio::action]] void close(const name &owner, const symbol &symbol);
         [[eosio::action]] void feeratio(const symbol &symbol, uint64_t fee_ratio);
         [[eosio::action]] void feereceiver(const symbol &symbol, const name &fee_receiver);
-        [[eosio::action]] void minfee(const symbol &symbol, const asset &min_fee_quantity);
-        [[eosio::action]] void feeexempt(const symbol &symbol, const name &account, bool is_fee_exempt);
-        [[eosio::action]] void pause(const symbol &symbol, bool is_paused);
-        [[eosio::action]] void freezeacct(const symbol &symbol, const name &account, bool is_frozen);
-        [[eosio::action]] void setacctperms( std::vector<name>& acccouts, const symbol& symbol, const bool& is_fee_exempt, const bool& airdrop_allowsend);
-
-
-        static asset get_supply(const name &token_contract_account, const symbol_code &sym_code)
-        {
-            stats statstable(token_contract_account, sym_code.raw());
-            const auto &st = statstable.get(sym_code.raw());
-            return st.supply;
-        }
-
+        [[eosio::action]] void minfee(const symbol &symbol, const asset &min_fee_quant);
+        [[eosio::action]] void feeexempt(const symbol &symbol, const name &account, bool is_fee_exempted);
+        [[eosio::action]] void setacctperms( std::vector<name>& acccouts, const symbol& symbol, const bool& is_fee_exempted, const bool& airdrop_allowsend);
         static asset get_balance(const name &token_contract_account, const name &owner, const symbol_code &sym_code)
         {
             accounts accountstable(token_contract_account, owner.value);
             const auto &ac = accountstable.get(sym_code.raw());
             return ac.balance;
         }
-        using initmeme_action = eosio::action_wrapper<"initmeme"_n, &xtoken::initmeme>;
+        using initmeme_action = eosio::action_wrapper<"creatememe"_n, &xtoken::creatememe>;
         using retire_action = eosio::action_wrapper<"retire"_n, &xtoken::retire>;
         using transfer_action = eosio::action_wrapper<"transfer"_n, &xtoken::transfer>;
         using notifypayfee_action = eosio::action_wrapper<"notifypayfee"_n, &xtoken::notifypayfee>;
@@ -72,36 +61,17 @@ namespace meme_token
         using feereceiver_action = eosio::action_wrapper<"feereceiver"_n, &xtoken::feereceiver>;
         using minfee_action = eosio::action_wrapper<"minfee"_n, &xtoken::minfee>;
         using feewhitelist_action = eosio::action_wrapper<"feeexempt"_n, &xtoken::feeexempt>;
-        using pause_action = eosio::action_wrapper<"pause"_n, &xtoken::pause>;
-        using freezeacct_action = eosio::action_wrapper<"freezeacct"_n, &xtoken::freezeacct>;
         using setacctperms_action = eosio::action_wrapper<"setacctperms"_n, &xtoken::setacctperms>;
         
         struct [[eosio::table]] account
         {
             asset balance;
             bool  is_frozen = false;
-            bool  is_fee_exempt = false;
+            bool  is_fee_exempted = false;
 
             uint64_t primary_key() const { return balance.symbol.code().raw(); }
         };
-
-        struct [[eosio::table]] currency_stats
-        {
-            asset supply;
-            asset max_supply;
-            uint64_t total_accounts = 0;   
-            name issuer;
-            bool is_paused = false;
-            name fee_receiver;              // fee receiver
-            uint64_t fee_ratio = 0;         // fee ratio, boost 10000
-            uint64_t destroy_ratio = 0;     // destroy ratio
-            asset min_fee_quantity;         // min fee quantity
-
-            uint64_t primary_key() const { return supply.symbol.code().raw(); }
-        };
-
         typedef eosio::multi_index<"accounts"_n, account> accounts;
-        typedef eosio::multi_index<"stat"_n, currency_stats> stats;
 
     };
 

@@ -66,41 +66,46 @@ class [[eosio::contract("applynewmeme")]] applynewmeme : public contract {
          _meme_tbl(get_self(), get_self().value)
     {
         _gstate = _global.exists() ? _global.get() : global_t{};
-        
     }
 
     ~applynewmeme() { _global.set( _gstate, get_self() ); }
 
-
    ACTION init(const name& admin, 
                const name& airdrop_contract, 
                const name& swap_contract, 
-               const name& fufi_contract,
-               const name& fufi_apply_contract, 
+               const name& dex_apply_contract, 
                const name& meme_token_contract);
 
    [[eosio::on_notify("*::transfer")]]
    void on_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
 
    ACTION applymeme(
-            const name&       owner,
-            const asset&      meme_quant, //total supply
-            const string&     disc,
-            const string&     icon_url, 
-            const string&     urls,
-            const uint64_t&   airdrop_ratio,
-            const uint64_t&   destroy_ratio,       //转账手续费销毁
-            const uint64_t&   transfer_ratio,      //转账手续费比例
-            const name&       fee_receiver,        //转账手续费接收账户
-            const bool&       airdrop_enable,
-            const extended_symbol&  trade_symbol,
-            const uint64_t&         init_price );
+                     const name&             applicant, 
+                     const asset&            meme_coin,
+                     const extended_asset&   quote_coin, //交易对买symbol MUSDT, AMAX, MUSE
+                     const string&           description,
+                     const string&           icon_url, 
+                     const string&           media_urls,  //twitter, telegram, descriptionord
+                     const string&           whitepaper_url,
+                     const bool&             airdrop_mode_on,
+                     const uint64_t&         airdrop_ratio,
+                     const uint64_t&         fee_ratio,           //转账手续费销毁
+                     const uint64_t&         fee_burn_ratio,      //转账手续费销毁
+                     const uint64_t&         transfer_ratio,
+                     const name&             fee_receiver //转账手续费接收账户
+                     );  
 
    ACTION closeairdrop(const symbol& symbol);
 
+   ACTION applytruedex(const symbol& symbol);
+
+   ACTION addmcap(const symbol& symbol, const asset& threshold);
+
    private:
-      void _create_hootswap(const extended_asset& sell_ex_quant, const extended_asset& buy_ex_quant);
+      void _hootswap_create(const extended_asset& sell_ex_quant, const extended_asset& buy_ex_quant);
       uint64_t _rand(const name& user, const uint64_t& range);
+
+      asset _get_current_market_value(const extended_symbol& buy_symbol, const extended_symbol& sell_symbol, asset& current_price);
       global_singleton     _global;
       global_t             _gstate;
       meme_t::table        _meme_tbl;

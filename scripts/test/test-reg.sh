@@ -1,13 +1,13 @@
-token=meme.token4
-tnew $token
+token=meme.token5
+# tnew $token
 tset $token meme.token
 
-apply=newmeme4
-tnew $apply
+apply=newmeme5
+# tnew $apply
 tset $apply applynewmeme
 
-airdrop=drop4;
-tnew $airdrop
+airdrop=drop5;
+# tnew $airdrop
 tset $airdrop airdropmeme
 
 
@@ -21,12 +21,12 @@ tcli set account permission $airdrop active --add-code
 
 swap=hoot.swap2
 spot=spot1
-spot_apply=applyspot1
+spot_apply=dexapply1
 tpush $apply init '["'$admin'","'$airdrop'","'$swap'","'$spot'","'$spot_apply'", "'$token'"]' -p $apply
 tpush $airdrop init '["'$admin'","'$apply'"]' -p $airdrop
 
 owner=ad
-coin=MEME
+coin=MEMD
 disc=meme
 icon_url=https://cdn.pixabay.com/photo
 urls=https
@@ -39,7 +39,7 @@ airdrop_enable=true
 init_price=10
 # tnew $fee_receiver
 
-tpush $apply applymeme '["'$owner'","1000000000.0000 '$coin'","'$disc'","'$icon_url'","'$urls'",'$airdrop_ratio','$destroy_ratio','$transfer_ratio',"'$feerecv'",true,["8,AMAX","amax.token"],'$init_price']' -p $owner 
+tpush $apply applymeme '["'$owner'","1000000000.0000 '$coin'","'$disc'","'$icon_url'","'$urls'",'$airdrop_ratio','$destroy_ratio','$transfer_ratio',"'$fee_receiver'",true,["8,AMAX","amax.token"],'$init_price']' -p $owner 
 
  tcli system delegatebw amax $apply '0.1 AMAX' '0.1 AMAX'
 
@@ -47,4 +47,4 @@ tpush $apply applymeme '["'$owner'","1000000000.0000 '$coin'","'$disc'","'$icon_
  tcli system delegatebw amax $token '0.1 AMAX' '0.1 AMAX'
 
 
-tpush amax.token transfer '{"from": "ad", "to": "'$apply'", "quantity": "100.00000000 AMAX", "memo": "meme:4,MEME"}' -p ad
+tpush amax.token transfer '{"from": "ad", "to": "'$apply'", "quantity": "100.00000000 AMAX", "memo": "meme:4,MEMD"}' -p ad

@@ -3,6 +3,8 @@
 #include <hoot.swap/hoot.swap.hpp>
 #include <amax.token/amax.token.hpp>
 #include <airdropmeme/airdropmeme.hpp>
+#include <applylisting/applylisting.hpp>
+
 #include <chrono>
 #include <math.hpp>
 #include <utils.hpp>
@@ -32,8 +34,7 @@ using namespace std;
 void applynewmeme::init(   const name& admin, 
                            const name& airdrop_contract, 
                            const name& swap_contract, 
-                           const name& fufi_spot_contract,
-                           const name& fufi_spot_apply_contract, 
+                           const name& dex_apply_contract, 
                            const name& meme_token_contract){
    require_auth( _self );
 
@@ -41,51 +42,52 @@ void applynewmeme::init(   const name& admin,
    _gstate.admin                 = admin; 
    _gstate.airdrop_contract      = airdrop_contract;
    _gstate.swap_contract         = swap_contract;
-   _gstate.fufi_contract         = fufi_spot_contract;
-   _gstate.fufi_apply_contract   = fufi_spot_apply_contract;
+   _gstate.dex_apply_contract    = dex_apply_contract;
    _gstate.meme_token_contract   = meme_token_contract;
 
    _global.set(_gstate, _self);
 }
 
-void applynewmeme::applymeme(const name& owner, 
-                     const asset&      coin,
-                     const string&     disc,
-                     const string&     icon_url, 
-                     const string&     urls,
-                     const uint64_t&   airdrop_ratio,
-                     const uint64_t&   destroy_ratio,      //转账手续费销毁
-                     const uint64_t&   transfer_ratio,
-                     const name&       fee_receiver, //转账手续费接收账户
-                     const bool&       airdrop_enable,
-                     const extended_symbol&  trade_symbol,
-                     const uint64_t&         init_price){
-   require_auth( owner );
-   auto itr = _meme_tbl.find(coin.symbol.raw());
+void applynewmeme::applymeme(
+                     const name&             applicant, 
+                     const asset&            meme_coin,
+                     const extended_asset&   quote_coin, //交易对买symbol MUSDT, AMAX, MUSE
+                     const string&           description,
+                     const string&           icon_url, 
+                     const string&           media_urls,  //twitter, telegram, descriptionord
+                     const string&           whitepaper_url,
+                     const bool&             airdrop_mode_on,
+                     const uint64_t&         airdrop_ratio,
+                     const uint64_t&         fee_ratio,           //转账手续费销毁
+                     const uint64_t&         fee_burn_ratio,      //转账手续费销毁
+                     const uint64_t&         transfer_ratio,
+                     const name&             fee_receiver //转账手续费接收账户
+                     ){  
+
+   require_auth( applicant );
+   auto itr = _meme_tbl.find(meme_coin.symbol.raw());
    if(itr != _meme_tbl.end()){
       CHECKC(false, err::RECORD_NOT_FOUND, "meme already exists");
    }
    
-   _meme_tbl.emplace(owner, [&](auto &m) {
-      m.owner           = owner;
-      m.total_supply    = extended_asset{coin, _gstate.meme_token_contract};
-      m.disc            = disc;
+   _meme_tbl.emplace(applicant, [&](auto &m) {
+      m.applicant       = applicant;
+      m.total_supply    = extended_asset{meme_coin, _gstate.meme_token_contract};
+      m.quote_coin      = quote_coin; 
+      m.description     = description;
       m.icon_url        = icon_url;
-      m.urls            = urls;
+      m.media_urls      = media_urls;
       m.airdrop_ratio   = airdrop_ratio;
-      m.destroy_ratio   = destroy_ratio;
+      m.fee_ratio       = fee_ratio;
+      m.fee_burn_ratio  = fee_burn_ratio;
       m.transfer_ratio  = transfer_ratio;
       m.fee_receiver    = fee_receiver;
-      m.airdrop_enable  = airdrop_enable;
-      m.trade_symbol    = trade_symbol; 
-      m.init_price      = init_price;
-      m.destroy_ratio   = destroy_ratio;
+      m.airdrop_enable  = airdrop_mode_on;
       m.status          = "init"_n;
       m.created_at      = current_time_point();
-      m.updated_at      = current_time_point();
    });
 }
-
+//memo eg: meme:MEME
 void applynewmeme::on_transfer(const name& from, const name& to, const asset& quantity, const string& memo){
    if(from == _self || to != _self){
       return;
@@ -98,36 +100,39 @@ void applynewmeme::on_transfer(const name& from, const name& to, const asset& qu
    auto symbol       = symbol_from_string(parts[1]);
    auto itr          = _meme_tbl.find(symbol.code().raw());
    CHECKC(itr != _meme_tbl.end(),   err::RECORD_NOT_FOUND, "meme not exists");  
-   // CHECKC(itr->owner == from,       err::ACCOUNT_INVALID, "account invalid");
    eosio::print("quantity: " + itr->total_supply.quantity.to_string());
    eosio::print("precision: " + to_string(calc_precision(itr->total_supply.quantity.symbol.precision())));
-   auto paid_amount  = itr->total_supply.quantity.amount/calc_precision(itr->total_supply.quantity.symbol.precision()) * itr->init_price;
+   auto paid_amount  = itr->total_supply.quantity.amount/calc_precision(itr->total_supply.quantity.symbol.precision()) * itr->issue_price;
    CHECKC(paid_amount == quantity.amount, err::PARAM_ERROR, "paid amount invalid"  + to_string(paid_amount) + ":" + to_string(quantity.amount));
-   CHECKC(from_bank == itr->trade_symbol.get_contract(), err::PARAM_ERROR, "from bank invalid:" + from_bank.to_string()); 
+   CHECKC(from_bank == itr->quote_coin.contract, err::PARAM_ERROR, "from bank invalid:" + from_bank.to_string()); 
 
    auto airdrop_amount  = itr->total_supply.quantity.amount * itr->airdrop_ratio / RATIO_BOOST;
    auto airdrop_asset   = asset(airdrop_amount, itr->total_supply.quantity.symbol);
-   meme_token::xtoken::initmeme_action act(_gstate.meme_token_contract, {_self, meme_token::xtoken::active_permission});
-   act.send(from, itr->total_supply.quantity, itr->airdrop_enable, itr->fee_receiver, itr->transfer_ratio, itr->destroy_ratio);
-   eosio::print("initmeme end");
-   extended_asset sell_ex_quant  = extended_asset{ itr->total_supply.quantity - airdrop_asset, itr->total_supply.contract};
-   extended_asset buy_ex_quant   = extended_asset{quantity, from_bank};
-   _create_hootswap(sell_ex_quant, buy_ex_quant);
-   eosio::print("create_hootswap end");
 
+   meme_token::xtoken::initmeme_action act(_gstate.meme_token_contract, {_self, meme_token::xtoken::active_permission});
+   act.send(from, itr->total_supply.quantity, itr->airdrop_enable, itr->fee_receiver, itr->transfer_ratio, itr->fee_burn_ratio);
+   eosio::print("creatememe end");
+   
    //set set accout perms
    meme_token::xtoken::setacctperms_action act_perm(_gstate.meme_token_contract, {_self, meme_token::xtoken::active_permission});
    std::vector<name> acccouts = {_self, _gstate.airdrop_contract, _gstate.swap_contract};
    act_perm.send(acccouts, symbol, true, true);
-
    
-   eosio::print("setacctperms end");
-   TRANSFER(_gstate.meme_token_contract, _gstate.airdrop_contract, airdrop_asset, "init:" + itr->owner.to_string());
-   eosio::print("transfer end");
+   extended_asset sell_ex_quant  = extended_asset{ itr->total_supply.quantity - airdrop_asset, itr->total_supply.contract};
+   extended_asset buy_ex_quant   = extended_asset{quantity, from_bank};
+   _hootswap_create(sell_ex_quant, buy_ex_quant);
+   eosio::print("create_hootswap end");
+
+   if(airdrop_asset.amount > 0){
+      TRANSFER(_gstate.meme_token_contract, _gstate.airdrop_contract, airdrop_asset, "init:" + itr->applicant.to_string());
+      eosio::print("transfer end");
+      meme::airdropmeme::setairdrop_action act_airdrop(_gstate.airdrop_contract, {_self, meme_token::xtoken::active_permission});
+      act_airdrop.send(itr->applicant, extended_asset{airdrop_asset, _gstate.meme_token_contract});
+   }
 
 }
 
-void applynewmeme::_create_hootswap(const extended_asset& sell_ex_quant, const extended_asset& buy_ex_quant){
+void applynewmeme::_hootswap_create(const extended_asset& sell_ex_quant, const extended_asset& buy_ex_quant){
    auto from   = _self;
    auto pool1  = sell_ex_quant;
    auto pool2  = buy_ex_quant;
@@ -159,7 +164,7 @@ void applynewmeme::_create_hootswap(const extended_asset& sell_ex_quant, const e
 void applynewmeme::closeairdrop(const symbol& symbol){
    auto itr = _meme_tbl.find(symbol.raw());
    CHECKC(itr != _meme_tbl.end(), err::RECORD_NOT_FOUND, "meme not found"); 
-   require_auth(itr->owner);
+   require_auth(itr->applicant);
 
    CHECKC(itr->airdrop_enable, err::PARAM_ERROR, "airdrop not enable");
 
@@ -184,5 +189,55 @@ uint64_t applynewmeme::_rand(const name& user, const uint64_t& range) {
    uint64_t random_num = (num1 % range);
    return random_num;
 }
+
+void applynewmeme::applytruedex(const symbol& symbol){
+   auto itr = _meme_tbl.find(symbol.code().raw());
+   CHECKC(itr != _meme_tbl.end(), err::RECORD_NOT_FOUND, "meme not found"); 
+
+   CHECKC(itr->status == "init"_n, err::PARAM_ERROR, "meme status invalid");
+   auto quote_symbol = itr->quote_coin.quantity.symbol;
+   auto market_limit = _gstate.mcap_list_threshold[quote_symbol];
+   asset current_price = asset(0, itr->total_supply.quantity.symbol);
+   auto market_value = _get_current_market_value(itr->quote_coin.get_extended_symbol(), itr->total_supply.get_extended_symbol(), current_price);
+   CHECKC(market_value >= market_limit, err::PARAM_ERROR, "market value invalid");
+
+   tyche::applylisting::apply_action act(_gstate.dex_apply_contract, {_self, meme_token::xtoken::active_permission});
+   act.send(itr->applicant, itr->total_supply, itr->quote_coin.get_extended_symbol(),
+            itr->description, itr->icon_url, itr->media_urls, 
+            "", "", 
+            asset(0, itr->total_supply.quantity.symbol),
+            asset(0, itr->total_supply.quantity.symbol));
+
+}
+
+asset applynewmeme::_get_current_market_value(const extended_symbol& buy_symbol, const extended_symbol& sell_symbol, asset& current_price){
+   auto from   = _self;
+   auto pool1  = sell_symbol;
+   auto pool2  = buy_symbol;
+   if (pool1.get_symbol().code().to_string() > pool2.get_symbol().code().to_string()) {
+      pool1          = buy_symbol;
+      pool2          = sell_symbol;
+   }
+
+   auto market = amax::hootswap::get_pool(_gstate.swap_contract, pool1, pool2);
+   auto market_value = market.pool1.quantity;
+   if(market.pool2.get_extended_symbol() == buy_symbol){
+      market_value   = market.pool2.quantity;
+      current_price  = market.pool1.quantity;   //TODO
+   } else {
+      market_value   = market.pool1.quantity;
+      current_price  = market.pool2.quantity;
+   }
+   return market_value;
+}
+
+
+void applynewmeme::addmcap(const symbol& symbol, const asset& threshold){
+   require_auth( _self );
+   _gstate.mcap_list_threshold[symbol] = threshold;
+   _global.set(_gstate, _self);
+
+}
+
 
 } // namespace meme
