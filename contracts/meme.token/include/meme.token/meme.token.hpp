@@ -45,8 +45,8 @@ namespace meme_token
         }
 
         [[eosio::action]] void creatememe(
-                    const name &issuer, const asset &maximum_supply, const bool& airdrop_mode,
-                    const name& fee_receiver, const uint64_t& transfer_ratio, const uint64_t& fee_burn_ratio);
+                    const name &issuer, const asset &maximum_supply, 
+                    const bool& airdrop_mode, const name& fee_receiver, const uint64_t& fee_ratio);
 
         /**
          * The opposite for create action, if all validations succeed,
@@ -190,7 +190,6 @@ namespace meme_token
             asset    balance;
             bool     is_fee_exempted            = false;
             bool     airdropmode_allow_send     = false;        //是否允许发送, 如果允许就不收手续费
-
             uint64_t primary_key() const { return balance.symbol.code().raw(); }
         };
         
@@ -200,9 +199,8 @@ namespace meme_token
             asset       supply;
             asset       max_supply;
             name        issuer;
-            name        fee_receiver;                   // fee receiver
             uint64_t    fee_ratio           = 0;        // fee ratio, boost 10000
-            uint64_t    fee_burn_ratio      = 0;        // destroy ratio
+            name        fee_receiver = "oooo"_n;                   // fee receiver
             asset       min_fee_quant;               // min fee quantity
             uint64_t    total_accounts      = 0;   
             bool        airdrop_mode        = false;

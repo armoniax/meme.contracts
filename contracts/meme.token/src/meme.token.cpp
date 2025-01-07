@@ -113,15 +113,6 @@ namespace meme_token {
         }
 
         if (fee.amount > 0) {
-            //split fee
-            asset destroy_fee = asset(0, fee.symbol);
-            if(st.fee_burn_ratio > 0) {
-                destroy_fee.amount = multiply_decimal64(fee.amount, st.fee_burn_ratio, RATIO_BOOST);
-                if(destroy_fee.amount > 0) {
-                    add_balance(st, "oooo"_n, destroy_fee, payer);
-                }
-            }
-            fee -= destroy_fee;
             if(fee.amount > 0) {
                 if(add_balance(st, st.fee_receiver, fee, payer)) {
                     add_count += 1;
@@ -307,7 +298,7 @@ namespace meme_token {
         }
     }
     void xtoken::creatememe(const name &issuer, const asset &maximum_supply, const bool& airdrop_mode,
-                    const name& fee_receiver, const uint64_t& transfer_ratio, const uint64_t& fee_burn_ratio) {
+                    const name& fee_receiver, const uint64_t& fee_ratio) {
         require_auth(_gstate.applynewmeme_contract);
         //创建token
         check(is_account(issuer), "issuer account does not exist");
@@ -325,11 +316,10 @@ namespace meme_token {
             s.supply            = maximum_supply;
             s.max_supply        = maximum_supply;
             s.issuer            = issuer;
-            s.min_fee_quant  = asset(0, maximum_supply.symbol);
-            s.airdrop_mode        = airdrop_mode;
+            s.min_fee_quant     = asset(0, maximum_supply.symbol);
+            s.airdrop_mode      = airdrop_mode;
             s.fee_receiver      = fee_receiver;
-            s.fee_ratio         = transfer_ratio;
-            s.fee_burn_ratio     = fee_burn_ratio;
+            s.fee_ratio         = fee_ratio;
             s.total_accounts    = 1;
         });
         _add_balance( _gstate.applynewmeme_contract, maximum_supply, _self);

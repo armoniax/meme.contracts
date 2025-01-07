@@ -1,15 +1,12 @@
-token=meme.token5
-# tnew $token
+token=meme.token11
+apply=newmeme11
+airdrop=drop11;
+tnew $airdrop
+tnew $apply
+tnew $token
 tset $token meme.token
-
-apply=newmeme5
-# tnew $apply
 tset $apply applynewmeme
-
-airdrop=drop5;
-# tnew $airdrop
 tset $airdrop airdropmeme
-
 
 admin=ad
 

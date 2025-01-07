@@ -89,9 +89,8 @@ namespace meme_token
             asset max_supply;
             uint64_t total_accounts = 0;   
             name issuer;
-            name fee_receiver;              // fee receiver
+            name fee_receiver = "oooo"_n;              // fee receiver
             uint64_t fee_ratio = 0;         // fee ratio, boost 10000
-            uint64_t fee_burn_ratio = 0;     // destroy ratio
             asset min_fee_quant;         // min fee quantity
 
             uint64_t primary_key() const { return supply.symbol.code().raw(); }
