@@ -60,7 +60,8 @@ void applynewmeme::applymeme(
                      const uint64_t&         airdrop_ratio,
                      const uint64_t&         fee_ratio,           //转账手续费销毁
                      const uint64_t&         swap_sell_fee_ratio,
-                     const name&             swap_sell_fee_receiver //转账手续费接收账户
+                     const name&             swap_sell_fee_receiver, //转账手续费接收账户
+                     const string&           issue_at
                      ){  
 
    require_auth( applicant );
@@ -83,6 +84,7 @@ void applynewmeme::applymeme(
       m.swap_sell_fee_receiver= swap_sell_fee_receiver;
       m.airdrop_enable        = airdrop_mode_on;
       m.status                = "init"_n;
+      m.issue_at              = issue_at;
       m.created_at            = current_time_point();
    });
 }
@@ -203,9 +205,10 @@ void applynewmeme::applytruedex(const symbol& symbol){
    CHECKC(market_value >= market_limit, err::PARAM_ERROR, "market value invalid");
    auto issue_price     = itr->quote_coin.quantity.amount / (itr->total_supply.quantity.amount / 100000000);
    tyche::applylisting::apply_action act(_gstate.dex_apply_contract, {_self, meme_token::xtoken::active_permission});
-   act.send(itr->applicant, itr->total_supply, itr->quote_coin.get_extended_symbol(),
+   
+   act.send(_self, itr->applicant, itr->total_supply, itr->quote_coin.get_extended_symbol(),
             itr->description, itr->icon_url, itr->media_urls, 
-            itr->whitepaper_url, "2021-01-01", 
+            itr->whitepaper_url, itr->issue_at, 
             issue_price,  current_price);
 
 }

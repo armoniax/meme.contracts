@@ -92,7 +92,8 @@ class [[eosio::contract("applynewmeme")]] applynewmeme : public contract {
             const uint64_t&         airdrop_ratio,
             const uint64_t&         fee_ratio,           //转账手续费销毁
             const uint64_t&         swap_sell_fee_ratio,
-            const name&             swap_sell_fee_receiver //转账手续费接收账户
+            const name&             swap_sell_fee_receiver, //转账手续费接收账户
+            const string&           issue_at
    );  
 
    ACTION closeairdrop(const symbol& symbol);

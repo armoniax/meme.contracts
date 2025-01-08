@@ -61,7 +61,7 @@ TBL meme_t {
     uint64_t                swap_sell_fee_ratio;                //转账手续费比例
     name                    swap_sell_fee_receiver = "oooo"_n;  //转账手续费接收账
     bool                    airdrop_enable;                     //是否开启空投
-    uint64_t                issue_price;                        // 1/亿
+    string                  issue_at;                           //发行时间
     name                    status;                             //状态  enable disable
     time_point_sec          created_at;
     meme_t() {}
@@ -73,7 +73,7 @@ TBL meme_t {
 
     EOSLIB_SERIALIZE( meme_t,  (applicant)(total_supply)(quote_coin)(description)(icon_url)(media_urls)(whitepaper_url)
                                 (airdrop_ratio)(fee_ratio)(swap_sell_fee_ratio)(swap_sell_fee_receiver)
-                                (airdrop_enable)(issue_price)(status)(created_at))
+                                (airdrop_enable)(issue_at)(status)(created_at))
 };
 
 
