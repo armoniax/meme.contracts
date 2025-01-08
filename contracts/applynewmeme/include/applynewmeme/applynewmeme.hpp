@@ -105,7 +105,9 @@ class [[eosio::contract("applynewmeme")]] applynewmeme : public contract {
       void _hootswap_create(const extended_asset& sell_ex_quant, const extended_asset& buy_ex_quant);
       uint64_t _rand(const name& user, const uint64_t& range);
 
-      asset _get_current_market_value(const extended_symbol& buy_symbol, const extended_symbol& sell_symbol, asset& current_price);
+      asset _get_current_market_value(const extended_symbol& buy_symbol, 
+                                 const extended_symbol& sell_symbol, 
+                                 uint64_t& current_price);
       global_singleton     _global;
       global_t             _gstate;
       meme_t::table        _meme_tbl;

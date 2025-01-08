@@ -57,6 +57,6 @@ user2=j2
 tpush $token transfer '["'$airdrop'","'$user'","100.0000 '$coin'","meme:4,'$coin'"]' -p $airdrop
 tpush $token transfer '["'$user'","'$user2'","100.0000 '$coin'","meme:4,'$coin'"]' -p $airdrop
 tpush $apply closeairdrop '["4,'$coin'"]' -p $owner
-tpush $token transfer '["'$user'","'$j2'","100.0000 '$coin'","meme:4,'$coin'"]' -p $user
+tpush $token transfer '["'$user'","'$user2'","100.0000 '$coin'","meme:4,'$coin'"]' -p $user
 
- tcli  get  currency balance $token  $user2
+tcli  get  currency balance $token  $user2

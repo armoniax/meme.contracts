@@ -76,6 +76,7 @@ void applynewmeme::applymeme(
       m.description           = description;
       m.icon_url              = icon_url;
       m.media_urls            = media_urls;
+      m.whitepaper_url        = whitepaper_url;
       m.airdrop_ratio         = airdrop_ratio;
       m.fee_ratio             = fee_ratio;
       m.swap_sell_fee_ratio   = swap_sell_fee_ratio;
@@ -195,21 +196,24 @@ void applynewmeme::applytruedex(const symbol& symbol){
    CHECKC(itr != _meme_tbl.end(), err::RECORD_NOT_FOUND, "meme not found"); 
 
    CHECKC(itr->status == "init"_n, err::PARAM_ERROR, "meme status invalid");
-   auto quote_symbol = itr->quote_coin.quantity.symbol;
-   auto market_limit = _gstate.mcap_list_threshold[quote_symbol];
-   asset current_price = asset(0, itr->total_supply.quantity.symbol);
-   auto market_value = _get_current_market_value(itr->quote_coin.get_extended_symbol(), itr->total_supply.get_extended_symbol(), current_price);
+   auto quote_symbol    = itr->quote_coin.quantity.symbol;
+   auto market_limit    = _gstate.mcap_list_threshold[quote_symbol];
+   uint64_t current_price = 0;
+   auto market_value    = _get_current_market_value(itr->quote_coin.get_extended_symbol(), itr->total_supply.get_extended_symbol(), current_price);
    CHECKC(market_value >= market_limit, err::PARAM_ERROR, "market value invalid");
-
+   auto issue_price     = itr->quote_coin.quantity.amount / (itr->total_supply.quantity.amount / 100000000);
    tyche::applylisting::apply_action act(_gstate.dex_apply_contract, {_self, meme_token::xtoken::active_permission});
    act.send(itr->applicant, itr->total_supply, itr->quote_coin.get_extended_symbol(),
             itr->description, itr->icon_url, itr->media_urls, 
-            "", "", 
-            0,0);
+            itr->whitepaper_url, "2021-01-01", 
+            issue_price,  current_price);
 
 }
 
-asset applynewmeme::_get_current_market_value(const extended_symbol& buy_symbol, const extended_symbol& sell_symbol, asset& current_price){
+asset applynewmeme::_get_current_market_value(
+      const extended_symbol& buy_symbol, 
+      const extended_symbol& sell_symbol, 
+      uint64_t& current_price){
    auto from   = _self;
    auto pool1  = sell_symbol;
    auto pool2  = buy_symbol;
@@ -222,10 +226,10 @@ asset applynewmeme::_get_current_market_value(const extended_symbol& buy_symbol,
    auto market_value = market.pool1.quantity;
    if(market.pool2.get_extended_symbol() == buy_symbol){
       market_value   = market.pool2.quantity;
-      current_price  = market.pool1.quantity;   //TODO
+      current_price  = market.pool2.quantity.amount / (market.pool1.quantity.amount /100000000);
    } else {
       market_value   = market.pool1.quantity;
-      current_price  = market.pool2.quantity;
+      current_price  = market.pool1.quantity.amount / (market.pool2.quantity.amount /100000000);
    }
    return market_value;
 }

@@ -54,7 +54,8 @@ TBL meme_t {
     extended_asset          quote_coin;                         //交易对买symbol MUSDT, AMAX, MUSE
     string                  description;
     string                  icon_url;                           //logo
-    string                  media_urls;    
+    string                  media_urls;
+    string                  whitepaper_url;    
     uint64_t                airdrop_ratio;                      //空投比例
     uint64_t                fee_ratio;                          //转账手续费销毁,转账手续费就是销毁
     uint64_t                swap_sell_fee_ratio;                //转账手续费比例
@@ -70,7 +71,7 @@ TBL meme_t {
 
     typedef eosio::multi_index< "memes"_n,  meme_t> table;
 
-    EOSLIB_SERIALIZE( meme_t,  (applicant)(total_supply)(quote_coin)(description)(icon_url)(media_urls)
+    EOSLIB_SERIALIZE( meme_t,  (applicant)(total_supply)(quote_coin)(description)(icon_url)(media_urls)(whitepaper_url)
                                 (airdrop_ratio)(fee_ratio)(swap_sell_fee_ratio)(swap_sell_fee_receiver)
                                 (airdrop_enable)(issue_price)(status)(created_at))
 };
