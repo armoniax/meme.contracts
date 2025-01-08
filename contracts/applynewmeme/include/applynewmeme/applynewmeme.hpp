@@ -79,6 +79,7 @@ class [[eosio::contract("applynewmeme")]] applynewmeme : public contract {
    [[eosio::on_notify("*::transfer")]]
    void on_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
 
+   ACTION clearmeme(const symbol& symbol);
    ACTION applymeme(
             const name&             applicant, 
             const asset&            meme_coin,

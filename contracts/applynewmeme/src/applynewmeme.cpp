@@ -92,16 +92,18 @@ void applynewmeme::on_transfer(const name& from, const name& to, const asset& qu
    }
 
    auto parts        = split( memo, ":" );
-   CHECKC(parts.size() == 2, err::PARAM_ERROR, "memo invalid");
-   CHECKC(parts[0] == "meme", err::PARAM_ERROR, "memo invalid");
+   CHECKC(parts.size() == 2,     err::PARAM_ERROR, "memo invalid");
+   CHECKC(parts[0] == "meme",    err::PARAM_ERROR, "memo invalid");
    auto from_bank    = get_first_receiver();
    auto symbol       = symbol_from_string(parts[1]);
    auto itr          = _meme_tbl.find(symbol.code().raw());
    CHECKC(itr != _meme_tbl.end(),   err::RECORD_NOT_FOUND, "meme not exists");  
-   eosio::print("quantity: " + itr->total_supply.quantity.to_string());
-   eosio::print("precision: " + to_string(calc_precision(itr->total_supply.quantity.symbol.precision())));
-   auto paid_amount  = itr->total_supply.quantity.amount/calc_precision(itr->total_supply.quantity.symbol.precision()) * itr->issue_price;
-   CHECKC(paid_amount == quantity.amount, err::PARAM_ERROR, "paid amount invalid"  + to_string(paid_amount) + ":" + to_string(quantity.amount));
+   eosio::print("quantity: " + itr->total_supply.quantity.to_string() + "\n");
+   eosio::print("precision: " + to_string(calc_precision(itr->total_supply.quantity.symbol.precision()))+ "\n");
+   eosio::print("quantity: " + quantity.to_string() + "\n");
+   eosio::print("from_bank: " + from_bank.to_string() + "\n");
+   eosio::print("quote_coin: " + itr->quote_coin.quantity.to_string() + "\n");
+   CHECKC(quantity == itr->quote_coin.quantity, err::PARAM_ERROR, "quantity invalid:" + quantity.to_string());
    CHECKC(from_bank == itr->quote_coin.contract, err::PARAM_ERROR, "from bank invalid:" + from_bank.to_string()); 
 
    auto airdrop_amount  = itr->total_supply.quantity.amount * itr->airdrop_ratio / RATIO_BOOST;
@@ -234,6 +236,14 @@ void applynewmeme::addmcap(const symbol& symbol, const asset& threshold){
    _gstate.mcap_list_threshold[symbol] = threshold;
    _global.set(_gstate, _self);
 
+}
+
+void applynewmeme::clearmeme(const symbol& symbol){
+   require_auth( _self );
+   auto itr = _meme_tbl.find(symbol.code().raw());
+   if(itr != _meme_tbl.end()){
+      _meme_tbl.erase(itr);
+   }
 }
 
 
