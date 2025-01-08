@@ -165,7 +165,7 @@ namespace meme_token
         }
         void setacctperms(const name& issuer, const name& to, const symbol& symbol,  const bool& airdrop_allowsend);
 
-        using initmeme_action = eosio::action_wrapper<"creatememe"_n, &xtoken::creatememe>;
+        using creatememe_action = eosio::action_wrapper<"creatememe"_n, &xtoken::creatememe>;
         using retire_action = eosio::action_wrapper<"retire"_n, &xtoken::retire>;
         using transfer_action = eosio::action_wrapper<"transfer"_n, &xtoken::transfer>;
         using notifypayfee_action = eosio::action_wrapper<"notifypayfee"_n, &xtoken::notifypayfee>;

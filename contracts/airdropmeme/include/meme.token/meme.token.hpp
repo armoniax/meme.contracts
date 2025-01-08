@@ -26,7 +26,7 @@ namespace meme_token
 
         [[eosio::action]] void creatememe(
                     const name &issuer, const asset &maximum_supply, const bool& airdrop_mode,
-                    const name& fee_receiver, const uint64_t& transfer_ratio, const uint64_t& fee_burn_ratio,
+                    const name& fee_receiver, const uint64_t& swap_sell_fee_ratio, const uint64_t& fee_burn_ratio,
                     const asset& airdrop_quant);
 
         [[eosio::action]] void closeairdrop(const symbol &symbol);
@@ -62,7 +62,7 @@ namespace meme_token
             const auto &ac = accountstable.get(sym_code.raw());
             return ac.balance;
         }
-        using initmeme_action = eosio::action_wrapper<"creatememe"_n, &xtoken::creatememe>;
+        using creatememe_action = eosio::action_wrapper<"creatememe"_n, &xtoken::creatememe>;
         using retire_action = eosio::action_wrapper<"retire"_n, &xtoken::retire>;
         using transfer_action = eosio::action_wrapper<"transfer"_n, &xtoken::transfer>;
         using closeairdrop_action = eosio::action_wrapper<"closeairdrop"_n, &xtoken::closeairdrop>;

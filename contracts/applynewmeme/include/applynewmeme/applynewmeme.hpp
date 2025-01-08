@@ -80,20 +80,19 @@ class [[eosio::contract("applynewmeme")]] applynewmeme : public contract {
    void on_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
 
    ACTION applymeme(
-                     const name&             applicant, 
-                     const asset&            meme_coin,
-                     const extended_asset&   quote_coin, //交易对买symbol MUSDT, AMAX, MUSE
-                     const string&           description,
-                     const string&           icon_url, 
-                     const string&           media_urls,  //twitter, telegram, descriptionord
-                     const string&           whitepaper_url,
-                     const bool&             airdrop_mode_on,
-                     const uint64_t&         airdrop_ratio,
-                     const uint64_t&         fee_ratio,           //转账手续费销毁
-                     const uint64_t&         fee_burn_ratio,      //转账手续费销毁
-                     const uint64_t&         transfer_ratio,
-                     const name&             fee_receiver //转账手续费接收账户
-                     );  
+            const name&             applicant, 
+            const asset&            meme_coin,
+            const extended_asset&   quote_coin, //交易对买symbol MUSDT, AMAX, MUSE
+            const string&           description,
+            const string&           icon_url, 
+            const string&           media_urls,  //twitter, telegram, descriptionord
+            const string&           whitepaper_url,
+            const bool&             airdrop_mode_on,
+            const uint64_t&         airdrop_ratio,
+            const uint64_t&         fee_ratio,           //转账手续费销毁
+            const uint64_t&         swap_sell_fee_ratio,
+            const name&             swap_sell_fee_receiver //转账手续费接收账户
+   );  
 
    ACTION closeairdrop(const symbol& symbol);
 

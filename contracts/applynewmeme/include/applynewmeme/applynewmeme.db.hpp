@@ -49,20 +49,19 @@ typedef eosio::singleton< "global"_n, global_t > global_singleton;
 
 //scope: _self
 TBL meme_t {
-    name                    applicant;         //sequence
-    extended_asset          total_supply;       //PK
-    extended_asset          quote_coin;       //交易对买symbol MUSDT, AMAX, MUSE
+    name                    applicant;                          //sequence
+    extended_asset          total_supply;                       //PK
+    extended_asset          quote_coin;                         //交易对买symbol MUSDT, AMAX, MUSE
     string                  description;
-    string                  icon_url;           //logo
+    string                  icon_url;                           //logo
     string                  media_urls;    
-    uint64_t                airdrop_ratio;      //空投比例
-    uint64_t                fee_ratio;          //转账手续费销毁
-    uint64_t                fee_burn_ratio;      //转账手续费销毁
-    uint64_t                transfer_ratio;     //转账手续费比例
-    name                    fee_receiver;       //转账手续费接收账户
-    bool                    airdrop_enable;     //是否开启空投
-    uint64_t                issue_price;        // 1/亿
-    name                    status;             //状态  enable disable
+    uint64_t                airdrop_ratio;                      //空投比例
+    uint64_t                fee_ratio;                          //转账手续费销毁,转账手续费就是销毁
+    uint64_t                swap_sell_fee_ratio;                //转账手续费比例
+    name                    swap_sell_fee_receiver = "oooo"_n;  //转账手续费接收账
+    bool                    airdrop_enable;                     //是否开启空投
+    uint64_t                issue_price;                        // 1/亿
+    name                    status;                             //状态  enable disable
     time_point_sec          created_at;
     meme_t() {}
     meme_t(const name& i): applicant(i) {}
@@ -72,7 +71,7 @@ TBL meme_t {
     typedef eosio::multi_index< "memes"_n,  meme_t> table;
 
     EOSLIB_SERIALIZE( meme_t,  (applicant)(total_supply)(quote_coin)(description)(icon_url)(media_urls)
-                                (airdrop_ratio)(fee_ratio)(fee_burn_ratio)(transfer_ratio)(fee_receiver)
+                                (airdrop_ratio)(fee_ratio)(swap_sell_fee_ratio)(swap_sell_fee_receiver)
                                 (airdrop_enable)(issue_price)(status)(created_at))
 };
 

@@ -59,9 +59,8 @@ void applynewmeme::applymeme(
                      const bool&             airdrop_mode_on,
                      const uint64_t&         airdrop_ratio,
                      const uint64_t&         fee_ratio,           //转账手续费销毁
-                     const uint64_t&         fee_burn_ratio,      //转账手续费销毁
-                     const uint64_t&         transfer_ratio,
-                     const name&             fee_receiver //转账手续费接收账户
+                     const uint64_t&         swap_sell_fee_ratio,
+                     const name&             swap_sell_fee_receiver //转账手续费接收账户
                      ){  
 
    require_auth( applicant );
@@ -71,20 +70,19 @@ void applynewmeme::applymeme(
    }
    
    _meme_tbl.emplace(applicant, [&](auto &m) {
-      m.applicant       = applicant;
-      m.total_supply    = extended_asset{meme_coin, _gstate.meme_token_contract};
-      m.quote_coin      = quote_coin; 
-      m.description     = description;
-      m.icon_url        = icon_url;
-      m.media_urls      = media_urls;
-      m.airdrop_ratio   = airdrop_ratio;
-      m.fee_ratio       = fee_ratio;
-      m.fee_burn_ratio  = fee_burn_ratio;
-      m.transfer_ratio  = transfer_ratio;
-      m.fee_receiver    = fee_receiver;
-      m.airdrop_enable  = airdrop_mode_on;
-      m.status          = "init"_n;
-      m.created_at      = current_time_point();
+      m.applicant             = applicant;
+      m.total_supply          = extended_asset{meme_coin, _gstate.meme_token_contract};
+      m.quote_coin            = quote_coin; 
+      m.description           = description;
+      m.icon_url              = icon_url;
+      m.media_urls            = media_urls;
+      m.airdrop_ratio         = airdrop_ratio;
+      m.fee_ratio             = fee_ratio;
+      m.swap_sell_fee_ratio   = swap_sell_fee_ratio;
+      m.swap_sell_fee_receiver= swap_sell_fee_receiver;
+      m.airdrop_enable        = airdrop_mode_on;
+      m.status                = "init"_n;
+      m.created_at            = current_time_point();
    });
 }
 //memo eg: meme:MEME
@@ -109,8 +107,8 @@ void applynewmeme::on_transfer(const name& from, const name& to, const asset& qu
    auto airdrop_amount  = itr->total_supply.quantity.amount * itr->airdrop_ratio / RATIO_BOOST;
    auto airdrop_asset   = asset(airdrop_amount, itr->total_supply.quantity.symbol);
 
-   meme_token::xtoken::initmeme_action act(_gstate.meme_token_contract, {_self, meme_token::xtoken::active_permission});
-   act.send(from, itr->total_supply.quantity, itr->airdrop_enable, itr->fee_receiver, itr->transfer_ratio, itr->fee_burn_ratio);
+   meme_token::xtoken::creatememe_action act(_gstate.meme_token_contract, {_self, meme_token::xtoken::active_permission});
+   act.send(from, itr->total_supply.quantity, itr->airdrop_enable, "oooo"_n, itr->fee_ratio);
    eosio::print("creatememe end");
    
    //set set accout perms
