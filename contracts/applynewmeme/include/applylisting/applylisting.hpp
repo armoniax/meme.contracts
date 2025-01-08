@@ -36,8 +36,8 @@ class applylisting {
          const string&                  urls,   
          const string&                  whitepaper,         //白皮书
          const string&                  issue_at,           //发行时间
-         const asset&                   issue_price,        //发行价格
-         const asset&                   init_price          //初始价格
+         const uint64_t&                issue_price,        //发行价格  1/亿
+         const uint64_t&                init_price          //初始价格  1/亿
       );
 
       using apply_action = action_wrapper<"apply"_n, &applylisting::apply>;

@@ -64,7 +64,7 @@ void applynewmeme::applymeme(
                      ){  
 
    require_auth( applicant );
-   auto itr = _meme_tbl.find(meme_coin.symbol.raw());
+   auto itr = _meme_tbl.find(meme_coin.symbol.code().raw());
    if(itr != _meme_tbl.end()){
       CHECKC(false, err::RECORD_NOT_FOUND, "meme already exists");
    }
@@ -203,8 +203,7 @@ void applynewmeme::applytruedex(const symbol& symbol){
    act.send(itr->applicant, itr->total_supply, itr->quote_coin.get_extended_symbol(),
             itr->description, itr->icon_url, itr->media_urls, 
             "", "", 
-            asset(0, itr->total_supply.quantity.symbol),
-            asset(0, itr->total_supply.quantity.symbol));
+            0,0);
 
 }
 
