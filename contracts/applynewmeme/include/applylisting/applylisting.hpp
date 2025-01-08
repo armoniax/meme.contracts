@@ -31,14 +31,14 @@ class applylisting {
          const name&                    submiter,
          const name&                    requester,          //sequence
          const extended_asset&          total_supply,       //PK
-         const extended_symbol&         quote_coin,       //交易对买symbol
-         const string&                  description,               //描述
+         const extended_symbol&         quote_coin,         //交易对买symbol
+         const string&                  description,        //描述
          const string&                  icon_url,           //logo
          const string&                  media_urls,   
-         const string&                  whitepaper_url,         //白皮书
+         const string&                  whitepaper_url,     //白皮书
          const string&                  issue_at,           //发行时间
-         const uint64_t&                 issue_price,        //发行价格 1/亿
-         const uint64_t&                 init_price          //初始价格 1/亿
+         const uint64_t&                issue_price,        //发行价格 1/亿
+         const uint64_t&                init_price          //初始价格 1/亿
       );
 
       using apply_action = action_wrapper<"apply"_n, &applylisting::apply>;
