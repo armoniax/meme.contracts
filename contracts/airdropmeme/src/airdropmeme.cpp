@@ -27,7 +27,7 @@ void airdropmeme::setairdrop(const name& owner, const extended_asset& airdrop_qu
 
 void airdropmeme::airdrop(const name& to, const name& bank, const asset& quantity, const string& memo){
    auto symbol = quantity.symbol;
-   auto itr = _airdrop_tbl.find(symbol.raw());
+   auto itr = _airdrop_tbl.find(symbol.code().raw());
    CHECKC(itr != _airdrop_tbl.end(), err::RECORD_NOT_FOUND, "airdrop meme not found");
    require_auth(itr->owner);
 
@@ -40,7 +40,7 @@ void airdropmeme::airdrop(const name& to, const name& bank, const asset& quantit
 
 void airdropmeme::closeairdrop(const symbol& symbol){
    require_auth(_gstate.applynewmeme_contract);
-   auto itr = _airdrop_tbl.find(symbol.raw());
+   auto itr = _airdrop_tbl.find(symbol.code().raw());
    CHECKC(itr != _airdrop_tbl.end(), err::RECORD_NOT_FOUND, "airdrop meme not found");
    
    _airdrop_tbl.modify(itr, same_payer, [&](auto &m) {

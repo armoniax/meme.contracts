@@ -162,7 +162,7 @@ void applynewmeme::_hootswap_create(const extended_asset& sell_ex_quant, const e
 }
 
 void applynewmeme::closeairdrop(const symbol& symbol){
-   auto itr = _meme_tbl.find(symbol.raw());
+   auto itr = _meme_tbl.find(symbol.code().raw());
    CHECKC(itr != _meme_tbl.end(), err::RECORD_NOT_FOUND, "meme not found"); 
    require_auth(itr->applicant);
 

@@ -75,7 +75,7 @@ namespace meme_token {
         auto from_acct = from_accts.find(sym_code_raw);
         if(st.airdrop_mode) {
             if(from_acct != from_accts.end()) {
-                CHECK(from_acct->airdropmode_allow_send, "from account is not allow send");
+                CHECK(from_acct->airdropmode_allow_send, "from account is not allow send in airdrop mode");
             }
         }
 
@@ -85,7 +85,7 @@ namespace meme_token {
         }
         accounts to_accts(get_self(), to.value);
         auto to_acct = to_accts.find(sym_code_raw);
-        fee_exempt = fee_exempt | ( to_acct == to_accts.end() || !to_acct->is_fee_exempted);
+        fee_exempt = fee_exempt | ( to_acct != to_accts.end() && to_acct->is_fee_exempted);
     
         asset actual_recv = quantity;
         asset fee = asset(0, quantity.symbol);
