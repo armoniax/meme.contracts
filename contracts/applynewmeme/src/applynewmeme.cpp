@@ -171,7 +171,6 @@ void applynewmeme::_hootswap_create(const extended_asset& sell_ex_quant, const e
    amax::hootswap::anti_whale_s anti_whale = {false, asset{100000000000000, pool1.quantity.symbol}, asset{100000000000000, pool1.quantity.symbol}};
    amax::hootswap::tran_fee_s tran_fee = {swap_sell_fee_receiver, 0, swap_sell_fee_ratio};
    if(is_sell_coin_symbol_left){
-      anti_whale = {false, asset{100000000000000, pool2.quantity.symbol}, asset{100000000000000, pool2.quantity.symbol}};
       tran_fee = {swap_sell_fee_receiver, swap_sell_fee_ratio, 0};
    }
    set<name> whitelist = {};

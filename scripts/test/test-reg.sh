@@ -1,9 +1,9 @@
-token=meme.token11
-apply=newmeme11
-airdrop=drop11
-# tnew $airdrop
-# tnew $apply
-# tnew $token
+token=meme.token
+apply=applynewmeme
+airdrop=airdropmemes
+tnew $airdrop
+tnew $apply
+tnew $token
 tset $token meme.token
 tset $apply applynewmeme
 tset $airdrop airdropmeme
@@ -17,14 +17,13 @@ tcli set account permission $apply active --add-code
 tcli set account permission $airdrop active --add-code
 
 swap=pool
-spot=spot1
 spot_apply=dexapply1
 tpush $apply init '["'$admin'","'$airdrop'","'$swap'","'$spot_apply'", "'$token'"]' -p $apply
 tpush $airdrop init '["'$admin'","'$apply'"]' -p $airdrop
 tpush $swap settkbanks '[["amax.token","amax.mtoken","mdao.token","cnyg.token","'$token'"]]' -p tech
 tpush $swap addlpcreator '["'$apply'"]' -p tech
 owner=ad
-coin=HMEM
+coin=HKLEM
 disc=meme
 icon_url=https://cdn.pixabay.com/photo
 urls=https
