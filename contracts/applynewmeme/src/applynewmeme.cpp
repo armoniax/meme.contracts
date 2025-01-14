@@ -123,7 +123,7 @@ void applynewmeme::on_transfer(const name& from, const name& to, const asset& qu
    
    extended_asset sell_ex_quant  = extended_asset{ itr->total_supply.quantity - airdrop_asset, itr->total_supply.contract};
    extended_asset buy_ex_quant   = extended_asset{quantity, from_bank};
-   _hootswap_create(sell_ex_quant, buy_ex_quant);
+   _hootswap_create(sell_ex_quant, buy_ex_quant, itr->swap_sell_fee_ratio, itr->swap_sell_fee_receiver);
    eosio::print("create_hootswap end");
 
    if(airdrop_asset.amount > 0){
@@ -135,13 +135,17 @@ void applynewmeme::on_transfer(const name& from, const name& to, const asset& qu
 
 }
 
-void applynewmeme::_hootswap_create(const extended_asset& sell_ex_quant, const extended_asset& buy_ex_quant){
+void applynewmeme::_hootswap_create(const extended_asset& sell_ex_quant, const extended_asset& buy_ex_quant,
+      const int16_t& swap_sell_fee_ratio, const name& swap_sell_fee_receiver
+      ){
    auto from   = _self;
    auto pool1  = sell_ex_quant;
    auto pool2  = buy_ex_quant;
+   auto is_sell_coin_symbol_left = true;
    if (pool1.quantity.symbol.code().to_string() > pool2.quantity.symbol.code().to_string()) {
       pool1          = buy_ex_quant;
       pool2          = sell_ex_quant;
+      is_sell_coin_symbol_left = false;
    }
 
    bool is_exists = amax::hootswap::is_exists_pool(_gstate.swap_contract, pool1.get_extended_symbol(), pool2.get_extended_symbol());
@@ -162,7 +166,17 @@ void applynewmeme::_hootswap_create(const extended_asset& sell_ex_quant, const e
                   _gstate.swap_contract,
                   pool2.quantity,
                   "mint:" + sympair.to_string() + ":2:" + to_string(_rand(from, 0xFFFFFFFFFFFFFFFF)) + ":" + from.to_string())
-}
+   amax::hootswap::marketconf_action act_conf(_gstate.swap_contract, {_self, meme_token::xtoken::active_permission});
+   amax::hootswap::anti_bot_s anti_bot = {false, 60, current_time_point()};
+   amax::hootswap::anti_whale_s anti_whale = {false, asset{100000000000000, pool1.quantity.symbol}, asset{100000000000000, pool1.quantity.symbol}};
+   amax::hootswap::tran_fee_s tran_fee = {swap_sell_fee_receiver, 0, swap_sell_fee_ratio};
+   if(is_sell_coin_symbol_left){
+      anti_whale = {false, asset{100000000000000, pool2.quantity.symbol}, asset{100000000000000, pool2.quantity.symbol}};
+      tran_fee = {swap_sell_fee_receiver, swap_sell_fee_ratio, 0};
+   }
+   set<name> whitelist = {};
+   act_conf.send(_self, sympair, anti_bot, anti_whale, false, tran_fee, whitelist );
+}  
 
 void applynewmeme::closeairdrop(const symbol& symbol){
    auto itr = _meme_tbl.find(symbol.code().raw());

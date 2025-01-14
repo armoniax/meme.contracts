@@ -103,7 +103,9 @@ class [[eosio::contract("applynewmeme")]] applynewmeme : public contract {
    ACTION addmcap(const symbol& symbol, const asset& threshold);
 
    private:
-      void _hootswap_create(const extended_asset& sell_ex_quant, const extended_asset& buy_ex_quant);
+      void _hootswap_create(const extended_asset& sell_ex_quant, const extended_asset& buy_ex_quant,
+                        const int16_t& swap_sell_fee_ratio, const name& swap_sell_fee_receiver);
+
       uint64_t _rand(const name& user, const uint64_t& range);
 
       asset _get_current_market_value(const extended_symbol& buy_symbol, 
