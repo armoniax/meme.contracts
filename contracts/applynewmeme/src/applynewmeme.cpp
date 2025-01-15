@@ -182,9 +182,9 @@ void applynewmeme::_hootswap_create(const extended_asset& sell_ex_quant, const e
    amax::hootswap::marketconf_action act_conf(_gstate.swap_contract, {_self, meme_token::xtoken::active_permission});
    amax::hootswap::anti_bot_s anti_bot = {false, 60, current_time_point()};
    amax::hootswap::anti_whale_s anti_whale = {false, asset{100000000000000, pool1.quantity.symbol}, asset{100000000000000, pool1.quantity.symbol}};
-   amax::hootswap::tran_fee_s tran_fee = {swap_sell_fee_receiver, 0, swap_sell_fee_ratio};
+   amax::hootswap::tran_fee_s tran_fee = {swap_sell_fee_receiver, 30, swap_sell_fee_ratio};
    if(is_sell_coin_symbol_left){
-      tran_fee = {swap_sell_fee_receiver, swap_sell_fee_ratio, 0};
+      tran_fee = {swap_sell_fee_receiver, swap_sell_fee_ratio, 30};
    }
    set<name> whitelist = {};
    act_conf.send(_self, sympair, anti_bot, anti_whale, false, tran_fee, whitelist );

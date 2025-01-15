@@ -15,15 +15,16 @@ tpush $token init '["'$admin'","'$apply'"]' -p $token
 tcli set account permission $token active --add-code
 tcli set account permission $apply active --add-code
 tcli set account permission $airdrop active --add-code
-
-swap=pool
-spot_apply=dexapply1
+spot_apply=applylisting
+token=meme.token
+apply=applynewmeme
+swap=hoot.swap2
 tpush $apply init '["'$admin'","'$airdrop'","'$swap'","'$spot_apply'", "'$token'"]' -p $apply
 tpush $airdrop init '["'$admin'","'$apply'"]' -p $airdrop
 tpush $swap settkbanks '[["amax.token","amax.mtoken","mdao.token","cnyg.token","'$token'"]]' -p tech
 tpush $swap addlpcreator '["'$apply'"]' -p tech
 owner=ad
-coin=HKLEM
+coin=BLEM
 disc=meme
 icon_url=https://cdn.pixabay.com/photo
 urls=https
