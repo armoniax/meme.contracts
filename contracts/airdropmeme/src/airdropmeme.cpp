@@ -25,7 +25,7 @@ void airdropmeme::setairdrop(const name& owner, const extended_asset& airdrop_qu
 }
 
 
-void airdropmeme::airdrop(const name& to, const name& bank, const asset& quantity, const string& memo){
+void airdropmeme::airdrop(const name& to, const asset& quantity, const string& memo){
    auto symbol = quantity.symbol;
    auto itr = _airdrop_tbl.find(symbol.code().raw());
    CHECKC(itr != _airdrop_tbl.end(), err::RECORD_NOT_FOUND, "airdrop meme not found");
