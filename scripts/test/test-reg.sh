@@ -34,13 +34,14 @@ fee_ratio=500
 transfer_ratio=300
 swap_sell_fee_receiver=feerecv
 
-tpush $apply applymeme '["'$owner'","1000000000.0000 '$coin'",["100.00000000 AMAX","amax.token"], 
+tpush $apply applymeme '["'$owner'","1000000000.0000 '$coin'","coin name",["100.00000000 AMAX","amax.token"], 
                         "'$disc'","'$icon_url'","'$urls'", "white_paper", '$airdrop_enable', 
                         '$airdrop_ratio' , '$fee_ratio', '$transfer_ratio',
                         "'$swap_sell_fee_receiver'","2025-01-01"]' -p $owner 
 
 
-tpush $apply clearmeme '[""]' -p $apply
+tpush $apply clearmeme '["4,BLEM"]' -p $apply
+tpush $apply clearmeme '["4,ALEM"]' -p $apply
 # tpush $apply clearmeme '["4,'$coin'"]' -p $apply 
 
  tcli system delegatebw amax $apply '0.1 AMAX' '0.1 AMAX'
