@@ -71,9 +71,9 @@ void applynewmeme::applymeme(
       CHECKC(false, err::RECORD_NOT_FOUND, "meme already exists");
    }
 
-   CHECKC(airdrop_ratio >= 0 && airdrop_ratio <= RATIO_BOOST, err::PARAM_ERROR, "airdrop_ratio invalid");
-   CHECKC(fee_ratio >= 0 && fee_ratio <= RATIO_BOOST, err::PARAM_ERROR, "fee_ratio invalid");
-   CHECKC(swap_sell_fee_ratio >= 30 && swap_sell_fee_ratio <= RATIO_BOOST, err::PARAM_ERROR, "swap_sell_fee_ratio invalid");
+   CHECKC(airdrop_ratio >= 0 && airdrop_ratio < RATIO_BOOST, err::PARAM_ERROR, "airdrop_ratio invalid");
+   CHECKC(fee_ratio >= 0 && fee_ratio < RATIO_BOOST, err::PARAM_ERROR, "fee_ratio invalid");
+   CHECKC(swap_sell_fee_ratio >= 30 && swap_sell_fee_ratio < RATIO_BOOST, err::PARAM_ERROR, "swap_sell_fee_ratio invalid");
    
    _meme_tbl.emplace(applicant, [&](auto &m) {
       m.applicant             = applicant;
@@ -213,6 +213,15 @@ void applynewmeme::closeairdrop(const symbol& symbol){
    //airdrop close airdrop 
    meme::airdropmeme::closeairdrop_action act2(_gstate.airdrop_contract, {_self, meme_token::xtoken::active_permission});
    act2.send(symbol);
+}
+
+void applynewmeme::updatemedia(const symbol& symbol, const string& media_urls){
+   auto itr = _meme_tbl.find(symbol.code().raw());
+   CHECKC(itr != _meme_tbl.end(), err::RECORD_NOT_FOUND, "meme not found"); 
+   require_auth(itr->applicant);
+   _meme_tbl.modify(itr, _self, [&](auto &m) {
+      m.media_urls = media_urls;
+   });
 }
 
 uint64_t applynewmeme::_rand(const name& user, const uint64_t& range) {
