@@ -83,6 +83,7 @@ class [[eosio::contract("applynewmeme")]] applynewmeme : public contract {
    ACTION applymeme(
             const name&             applicant, 
             const asset&            meme_coin,
+            const string&           symbol_name,
             const extended_asset&   quote_coin, //交易对买symbol MUSDT, AMAX, MUSE
             const string&           description,
             const string&           icon_url, 

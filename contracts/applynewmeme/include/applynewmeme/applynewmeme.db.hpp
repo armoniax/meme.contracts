@@ -51,6 +51,7 @@ typedef eosio::singleton< "global"_n, global_t > global_singleton;
 TBL meme_t {
     name                    applicant;                          //sequence
     extended_asset          total_supply;                       //PK
+    string                  coin_name;                        //symbol name
     extended_asset          quote_coin;                         //交易对买symbol MUSDT, AMAX, MUSE
     string                  description;
     string                  icon_url;                           //logo
@@ -71,7 +72,7 @@ TBL meme_t {
 
     typedef eosio::multi_index< "memes"_n,  meme_t> table;
 
-    EOSLIB_SERIALIZE( meme_t,  (applicant)(total_supply)(quote_coin)(description)(icon_url)(media_urls)(whitepaper_url)
+    EOSLIB_SERIALIZE( meme_t,  (applicant)(total_supply)(coin_name)(quote_coin)(description)(icon_url)(media_urls)(whitepaper_url)
                                 (airdrop_ratio)(fee_ratio)(swap_sell_fee_ratio)(swap_sell_fee_receiver)
                                 (airdrop_enable)(issue_at)(status)(created_at))
 };

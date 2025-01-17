@@ -51,6 +51,7 @@ void applynewmeme::init(   const name& admin,
 void applynewmeme::applymeme(
                      const name&             applicant, 
                      const asset&            meme_coin,
+                     const string&           coin_name,
                      const extended_asset&   quote_coin, //交易对买symbol MUSDT, AMAX, MUSE
                      const string&           description,
                      const string&           icon_url, 
@@ -73,6 +74,7 @@ void applynewmeme::applymeme(
    _meme_tbl.emplace(applicant, [&](auto &m) {
       m.applicant             = applicant;
       m.total_supply          = extended_asset{meme_coin, _gstate.meme_token_contract};
+      m.coin_name             = coin_name;
       m.quote_coin            = quote_coin; 
       m.description           = description;
       m.icon_url              = icon_url;
