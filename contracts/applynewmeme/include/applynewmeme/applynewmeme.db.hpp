@@ -70,7 +70,7 @@ TBL meme_t {
 
     uint64_t primary_key()const { return total_supply.quantity.symbol.code().raw() ; }
 
-    typedef eosio::multi_index< "memes"_n,  meme_t> table;
+    typedef eosio::multi_index< "memelist"_n,  meme_t> table;
 
     EOSLIB_SERIALIZE( meme_t,  (applicant)(total_supply)(coin_name)(quote_coin)(description)(icon_url)(media_urls)(whitepaper_url)
                                 (airdrop_ratio)(fee_ratio)(swap_sell_fee_ratio)(swap_sell_fee_receiver)
