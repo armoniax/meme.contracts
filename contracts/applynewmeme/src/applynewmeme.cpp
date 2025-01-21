@@ -152,6 +152,10 @@ void applynewmeme::on_transfer(const name& from, const name& to, const asset& qu
       act_airdrop.send(itr->applicant, extended_asset{airdrop_asset, _gstate.meme_token_contract});
    }
 
+   _meme_tbl.modify(itr, _self, [&](auto &m) {
+      m.status = "applied"_n;
+   });
+
 }
 
 void applynewmeme::_hootswap_create(const extended_asset& sell_ex_quant, const extended_asset& buy_ex_quant,

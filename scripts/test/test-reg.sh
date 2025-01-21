@@ -24,7 +24,7 @@ tpush $airdrop init '["'$admin'","'$apply'"]' -p $airdrop
 tpush $swap settkbanks '[["amax.token","amax.mtoken","mdao.token","cnyg.token","'$token'"]]' -p tech
 tpush $swap addlpcreator '["'$apply'"]' -p tech
 owner=ad
-coin=BLEM
+coin=NLEM
 disc=meme
 icon_url=https://cdn.pixabay.com/photo
 urls=https
@@ -32,7 +32,7 @@ airdrop_enable=true
 airdrop_ratio=1000
 fee_ratio=500
 transfer_ratio=300
-swap_sell_fee_receiver=feerecv
+swap_sell_fee_receiver=
 
 tpush $apply applymeme '["'$owner'","1000000000.0000 '$coin'","coin name",["100.00000000 AMAX","amax.token"], 
                         "'$disc'","'$icon_url'","'$urls'", "white_paper", '$airdrop_enable', 
