@@ -137,7 +137,7 @@ void applynewmeme::on_transfer(const name& from, const name& to, const asset& qu
    
    //set set accout perms
    meme_token::xtoken::setacctperms_action act_perm(_gstate.meme_token_contract, {_self, meme_token::xtoken::active_permission});
-   std::vector<name> acccouts = {_self, _gstate.airdrop_contract, _gstate.swap_contract};
+   std::vector<name> acccouts = {_self, _gstate.airdrop_contract, _gstate.swap_contract, "amax.split"_n};
    act_perm.send(acccouts, symbol, true, true);
    
    extended_asset sell_ex_quant  = extended_asset{ itr->total_supply.quantity - airdrop_asset, itr->total_supply.contract};

@@ -148,7 +148,7 @@ namespace meme_token
          * @param account - account name.
          * @param is_frozen - is account frozen.
          */
-        [[eosio::action]] void setacctperms( std::vector<name>& acccouts, const symbol& symbol, const bool& is_fee_exempted, const bool& airdrop_allowsend);
+        [[eosio::action]] void setacctperms( std::vector<name>& acccouts, const symbol& symbol, const bool& is_fee_exempted, const bool& airdropmode_allow_transfer);
 
         static asset get_supply(const name &token_contract_account, const symbol_code &sym_code)
         {
@@ -163,7 +163,7 @@ namespace meme_token
             const auto &ac = accountstable.get(sym_code.raw());
             return ac.balance;
         }
-        void setacctperms(const name& issuer, const name& to, const symbol& symbol,  const bool& airdrop_allowsend);
+        void setacctperms(const name& issuer, const name& to, const symbol& symbol,  const bool& airdropmode_allow_transfer);
 
         using creatememe_action = eosio::action_wrapper<"creatememe"_n, &xtoken::creatememe>;
         using retire_action = eosio::action_wrapper<"retire"_n, &xtoken::retire>;
@@ -189,7 +189,7 @@ namespace meme_token
         {
             asset    balance;
             bool     is_fee_exempted            = false;
-            bool     airdropmode_allow_send     = false;        //是否允许发送, 如果允许就不收手续费
+            bool     airdropmode_allow_transfer     = false;        //是否允许发送, 如果允许就不收手续费
             uint64_t primary_key() const { return balance.symbol.code().raw(); }
         };
         
@@ -200,7 +200,7 @@ namespace meme_token
             asset       max_supply;
             name        issuer;
             uint64_t    fee_ratio           = 0;        // fee ratio, boost 10000
-            name        fee_receiver = "oooo"_n;                   // fee receiver
+            name        fee_receiver = "oooo"_n;      // fee receiver
             asset       min_fee_quant;               // min fee quantity
             uint64_t    total_accounts      = 0;   
             bool        airdrop_mode        = false;

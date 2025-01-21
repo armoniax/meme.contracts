@@ -73,18 +73,19 @@ namespace meme_token {
         CHECK(quantity > st.min_fee_quant, "quantity must larger than min fee:" + st.min_fee_quant.to_string());
         accounts from_accts(get_self(), from.value);
         auto from_acct = from_accts.find(sym_code_raw);
+        accounts to_accts(get_self(), to.value);
+        auto to_acct = to_accts.find(sym_code_raw);
         if(st.airdrop_mode) {
-            if(from_acct != from_accts.end()) {
-                CHECK(from_acct->airdropmode_allow_send, "from account is not allow send in airdrop mode");
-            }
+            auto from_flag = from_acct->airdropmode_allow_transfer;
+            auto to_flag = to_acct != to_accts.end() ? to_acct->airdropmode_allow_transfer : false;
+            check(from_flag | to_flag, "from account and to account is not allow send in airdrop mode: " + from.to_string() + " -> " + to.to_string());
         }
 
         bool fee_exempt = true;
         if(from_acct != from_accts.end()) {
             fee_exempt = from_acct->is_fee_exempted; 
         }
-        accounts to_accts(get_self(), to.value);
-        auto to_acct = to_accts.find(sym_code_raw);
+
         fee_exempt = fee_exempt | ( to_acct != to_accts.end() && to_acct->is_fee_exempted);
     
         asset actual_recv = quantity;
@@ -274,7 +275,7 @@ namespace meme_token {
 
 
     void xtoken::setacctperms(std::vector<name>& acccouts, const symbol& symbol,  
-                    const bool& is_fee_exempted, const bool& airdrop_allowsend) {
+                    const bool& is_fee_exempted, const bool& airdropmode_allow_transfer) {
         check(has_auth( _gstate.admin) || has_auth( _gstate.applynewmeme_contract), "only admin or applynewmeme_contract can setacctperms");
         check(acccouts.size() > 0, "acccouts is empty");
 
@@ -285,14 +286,14 @@ namespace meme_token {
             auto itr = acnts.find( symbol.code().raw() );
             if( itr == acnts.end() ) {
                 acnts.emplace( _self, [&]( auto& a ){
-                    a.balance                   = asset(0, symbol);
-                    a.is_fee_exempted             = is_fee_exempted;
-                    a.airdropmode_allow_send        = airdrop_allowsend;
+                    a.balance                    = asset(0, symbol);
+                    a.is_fee_exempted            = is_fee_exempted;
+                    a.airdropmode_allow_transfer = airdropmode_allow_transfer;
                 });
             } else {
                 acnts.modify( itr, _self, [&]( auto& a ) {
-                    a.is_fee_exempted             = is_fee_exempted;
-                    a.airdropmode_allow_send        = airdrop_allowsend;
+                    a.is_fee_exempted            = is_fee_exempted;
+                    a.airdropmode_allow_transfer = airdropmode_allow_transfer;
                 });
             }
         }
@@ -332,7 +333,7 @@ namespace meme_token {
             to_accts.emplace(ram_payer, [&](auto &a) {
                 a.balance = value;
                 a.is_fee_exempted = true;
-                a.airdropmode_allow_send = true;
+                a.airdropmode_allow_transfer = true;
             });
         } else { 
                 to_accts.modify(to, same_payer, [&](auto &a) {
@@ -349,12 +350,12 @@ namespace meme_token {
             to_accts.emplace(ram_payer, [&](auto &a) {
                 a.balance = asset(0, symbol);
                 a.is_fee_exempted = true;
-                a.airdropmode_allow_send = true;
+                a.airdropmode_allow_transfer = true;
             });
         } else { 
                 to_accts.modify(to, same_payer, [&](auto &a) {
                 a.is_fee_exempted = true;
-                a.airdropmode_allow_send = true;
+                a.airdropmode_allow_transfer = true;
             });
         }
     }

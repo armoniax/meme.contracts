@@ -43,7 +43,7 @@ namespace meme_token
         [[eosio::action]] void feereceiver(const symbol &symbol, const name &fee_receiver);
         [[eosio::action]] void minfee(const symbol &symbol, const asset &min_fee_quant);
         [[eosio::action]] void feeexempt(const symbol &symbol, const name &account, bool is_fee_exempted);
-        [[eosio::action]] void setacctperms( std::vector<name>& acccouts, const symbol& symbol, const bool& is_fee_exempted, const bool& airdrop_allowsend);
+        [[eosio::action]] void setacctperms( std::vector<name>& acccouts, const symbol& symbol, const bool& is_fee_exempted, const bool& airdropmode_allow_transfer);
         static asset get_balance(const name &token_contract_account, const name &owner, const symbol_code &sym_code)
         {
             accounts accountstable(token_contract_account, owner.value);
