@@ -75,6 +75,18 @@ void applynewmeme::applymeme(
    CHECKC(fee_ratio >= 0 && fee_ratio < RATIO_BOOST, err::PARAM_ERROR, "fee_ratio invalid");
    CHECKC(swap_sell_fee_ratio >= 30 && swap_sell_fee_ratio < RATIO_BOOST, err::PARAM_ERROR, "swap_sell_fee_ratio invalid");
    
+   auto pool1  = extended_asset{meme_coin, _gstate.meme_token_contract};
+   auto pool2  = quote_coin;
+   auto is_sell_coin_symbol_left = true;
+   if (pool1.quantity.symbol.code().to_string() > pool2.quantity.symbol.code().to_string()) {
+      pool1          = quote_coin;
+      pool2          = extended_asset{meme_coin, _gstate.meme_token_contract};
+      is_sell_coin_symbol_left = false;
+   }
+
+   bool is_exists = amax::hootswap::is_exists_pool(_gstate.swap_contract, pool1.get_extended_symbol(), pool2.get_extended_symbol());
+   CHECKC(!is_exists, err::RECORD_EXISTING, "this symbol can't create hootswap pool");
+   auto sympair   = amax::hootswap::pool_symbol(pool1.quantity.symbol, pool2.quantity.symbol);
    _meme_tbl.emplace(applicant, [&](auto &m) {
       m.applicant             = applicant;
       m.total_supply          = extended_asset{meme_coin, _gstate.meme_token_contract};
@@ -90,22 +102,13 @@ void applynewmeme::applymeme(
       m.swap_sell_fee_receiver= swap_sell_fee_receiver;
       m.airdrop_enable        = airdrop_mode_on;
       m.status                = "init"_n;
+      m.swap_tradepair        = sympair;
       m.issue_at              = issue_at;
       m.created_at            = current_time_point();
    });
 
 
-   auto pool1  = extended_asset{meme_coin, _gstate.meme_token_contract};
-   auto pool2  = quote_coin;
-   auto is_sell_coin_symbol_left = true;
-   if (pool1.quantity.symbol.code().to_string() > pool2.quantity.symbol.code().to_string()) {
-      pool1          = quote_coin;
-      pool2          = extended_asset{meme_coin, _gstate.meme_token_contract};
-      is_sell_coin_symbol_left = false;
-   }
 
-   bool is_exists = amax::hootswap::is_exists_pool(_gstate.swap_contract, pool1.get_extended_symbol(), pool2.get_extended_symbol());
-   CHECKC(!is_exists, err::RECORD_EXISTING, "this symbol can't create hootswap pool");
 }
 //memo eg: meme:MEME
 void applynewmeme::on_transfer(const name& from, const name& to, const asset& quantity, const string& memo){

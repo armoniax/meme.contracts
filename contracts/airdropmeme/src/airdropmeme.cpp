@@ -35,7 +35,6 @@ void airdropmeme::airdrop(const name& to, const asset& quantity, const string& m
 
    meme_token::xtoken::transfer_action act(itr->quant.contract, {_self, meme_token::xtoken::active_permission});
    act.send(_self, to, quantity, memo);
-
 }
 
 void airdropmeme::closeairdrop(const symbol& symbol){
