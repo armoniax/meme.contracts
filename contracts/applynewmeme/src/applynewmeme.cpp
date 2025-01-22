@@ -71,7 +71,7 @@ void applynewmeme::applymeme(
       CHECKC(false, err::RECORD_NOT_FOUND, "meme already exists");
    }
 
-   CHECKC(airdrop_ratio >= 0 && airdrop_ratio < RATIO_BOOST, err::PARAM_ERROR, "airdrop_ratio invalid");
+   CHECKC(airdrop_ratio >= 0 && airdrop_ratio < 2500, err::PARAM_ERROR, "airdrop_ratio invalid");
    CHECKC(fee_ratio >= 0 && fee_ratio < RATIO_BOOST, err::PARAM_ERROR, "fee_ratio invalid");
    CHECKC(swap_sell_fee_ratio >= 30 && swap_sell_fee_ratio < RATIO_BOOST, err::PARAM_ERROR, "swap_sell_fee_ratio invalid");
    
