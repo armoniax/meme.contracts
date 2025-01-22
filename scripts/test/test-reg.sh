@@ -24,7 +24,7 @@ tpush $airdrop init '["'$admin'","'$apply'"]' -p $airdrop
 tpush $swap settkbanks '[["amax.token","amax.mtoken","mdao.token","cnyg.token","'$token'"]]' -p tech
 tpush $swap addlpcreator '["'$apply'"]' -p tech
 owner=ad
-coin=NLEM
+coin=GDEM
 disc=meme
 icon_url=https://cdn.pixabay.com/photo
 urls=https
@@ -66,3 +66,10 @@ tpush $token transfer '["'$user'","'$user2'","100.0000 '$coin'","meme:4,'$coin'"
 tcli  get  currency balance $token  $user2  
 
 tpush $apply applytruedex '["4,'$coin'"]' -p $owner
+
+
+
+tpush meme.token transfer '{"from": "airdropmemes", "to": "ad", "quantity": "100.0000 RRRR", "memo": ""}' -p airdropmemes
+
+
+tpush meme.token transfer '{"from": "ad", "to": "airdropmemes", "quantity": "100.0000 RRRR", "memo": ""}' -p ad
