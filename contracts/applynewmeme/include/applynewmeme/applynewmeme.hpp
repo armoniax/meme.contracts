@@ -64,11 +64,16 @@ class [[eosio::contract("applynewmeme")]] applynewmeme : public contract {
          _dbc(get_self()),
          _global(get_self(), get_self().value),
          _meme_tbl(get_self(), get_self().value)
-    {
-        _gstate = _global.exists() ? _global.get() : global_t{};
-    }
+   {
+      _gstate = _global.exists() ? _global.get() : global_t{};
 
-    ~applynewmeme() { _global.set( _gstate, get_self() ); }
+      _init_mcap_list_threshold = {
+         {symbol("AMAX", 8), asset(2000000000, symbol("AMAX", 8))},
+         {symbol("MUSE", 8), asset(100000000000, symbol("MUSE", 8))}
+      };
+   }
+
+   ~applynewmeme() { _global.set( _gstate, get_self() ); }
 
    ACTION init(const name& admin, 
                const name& airdrop_contract, 
@@ -117,5 +122,8 @@ class [[eosio::contract("applynewmeme")]] applynewmeme : public contract {
       global_singleton     _global;
       global_t             _gstate;
       meme_t::table        _meme_tbl;
+
+      map<symbol, asset>   _init_mcap_list_threshold;
+
 };
 } //namespace amax

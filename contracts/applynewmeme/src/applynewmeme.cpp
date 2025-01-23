@@ -87,6 +87,10 @@ void applynewmeme::applymeme(
    bool is_exists = amax::hootswap::is_exists_pool(_gstate.swap_contract, pool1.get_extended_symbol(), pool2.get_extended_symbol());
    CHECKC(!is_exists, err::RECORD_EXISTING, "this symbol can't create hootswap pool");
    auto sympair   = amax::hootswap::pool_symbol(pool1.quantity.symbol, pool2.quantity.symbol);
+
+   auto limit = _init_mcap_list_threshold.find(quote_coin.quantity.symbol);
+   CHECKC(limit != _init_mcap_list_threshold.end(), err::RECORD_NOT_FOUND, "quote_coin not exists");
+   CHECKC(quote_coin.quantity.amount >= limit->second.amount, err::PARAM_ERROR, "quote_coin amount invalid");
    _meme_tbl.emplace(applicant, [&](auto &m) {
       m.applicant             = applicant;
       m.total_supply          = extended_asset{meme_coin, _gstate.meme_token_contract};
