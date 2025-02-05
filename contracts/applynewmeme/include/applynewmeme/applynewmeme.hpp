@@ -68,8 +68,8 @@ class [[eosio::contract("applynewmeme")]] applynewmeme : public contract {
       _gstate = _global.exists() ? _global.get() : global_t{};
 
       _init_mcap_list_threshold = {
-         {symbol("AMAX", 8), asset(2000000000, symbol("AMAX", 8))},
-         {symbol("MUSE", 8), asset(100000000000, symbol("MUSE", 8))}
+         {symbol("AMAX", 8), asset(100000000 * 1, symbol("AMAX", 8))},
+         {symbol("MUSE", 8), asset(100000000 * 1, symbol("MUSE", 8))}
       };
    }
 

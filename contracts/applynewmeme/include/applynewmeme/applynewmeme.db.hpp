@@ -28,9 +28,6 @@ static constexpr uint32_t MAX_TITLE_SIZE        = 2048;
 #define TBL struct [[eosio::table, eosio::contract("applynewmeme")]]
 #define NTBL(name) struct [[eosio::table(name), eosio::contract("applynewmeme")]]
 
-/* public key -> update content */
-typedef std::variant<eosio::public_key, string> recover_target_type;
-
 NTBL("global") global_t {
     name                     admin               = "armoniaadmin"_n;             //管理员
     name                     airdrop_contract    = "memesairdrop"_n;            //空投合约
